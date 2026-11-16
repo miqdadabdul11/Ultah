@@ -28,14 +28,12 @@ const CONFIG = {
   },
 
   // Daftar Foto Kenangan untuk Galeri Polaroid
-  // Simpan file foto di folder /assets/photos/
-  // Jika file foto belum ada atau gagal dimuat, kartu akan otomatis menampilkan placeholder polaroid vintage yang indah.
   PHOTOS: [
-    { src: "assets/photos/foto1.jpg", cap: "Masa muda Abi" },
-    { src: "assets/photos/foto2.jpg", cap: "Bersama keluarga" },
-    { src: "assets/photos/foto3.jpg", cap: "Hari yang indah" },
-    { src: "assets/photos/foto4.jpg", cap: "Senyum Abi" },
-    { src: "assets/photos/foto5.jpg", cap: "Kenangan favorit" }
+    { src: "assets/photos/satu.jpeg", cap: "Masa muda Abi" },
+    { src: "assets/photos/dua.jpeg", cap: "Bersama keluarga" },
+    { src: "assets/photos/tiga.jpeg", cap: "Hari yang indah" },
+    { src: "assets/photos/empat.jpeg", cap: "Senyum Abi" },
+    { src: "assets/photos/lima.png", cap: "Kenangan favorit" }
   ],
 
   // 6 Kartu Doa (Bisa Di-flip)
@@ -341,18 +339,19 @@ class AmbientBackground {
 
   createParticle(randomY = false) {
     const isBalloon = Math.random() > 0.45;
-    const colors = ['#d9b25f', '#f3cf7a', '#7a1f2b', '#f6ecd6', '#e098a0'];
+    // Warna lembut & hangat agar tidak menutupi teks saat melayang
+    const colors = ['#f7d78a', '#f6ecd6', '#eed7a1', '#e5b0b7', '#d9b25f'];
     return {
       type: isBalloon ? 'balloon' : 'heart',
       x: Math.random() * this.width,
       y: randomY ? Math.random() * this.height : this.height + 40,
-      size: isBalloon ? Math.random() * 12 + 16 : Math.random() * 10 + 12,
-      speedY: Math.random() * 0.5 + 0.35,
-      swaySpeed: Math.random() * 0.018 + 0.01,
-      swayDist: Math.random() * 25 + 15,
+      size: isBalloon ? Math.random() * 8 + 14 : Math.random() * 8 + 10,
+      speedY: Math.random() * 0.35 + 0.25,
+      swaySpeed: Math.random() * 0.015 + 0.008,
+      swayDist: Math.random() * 20 + 12,
       phase: Math.random() * Math.PI * 2,
       color: colors[Math.floor(Math.random() * colors.length)],
-      alpha: Math.random() * 0.35 + 0.25
+      alpha: Math.random() * 0.12 + 0.08 // Transparan halus di latar belakang
     };
   }
 
