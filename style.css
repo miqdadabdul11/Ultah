@@ -1,0 +1,1956 @@
+/* ============================================================
+   WEBSITE ULANG TAHUN KE-57 ABI
+   Palet:
+   - Navy Tua:   #0c1630 (Background utama & kartu)
+   - Emas:       #d9b25f (Aksen, glow, tombol utama, bordir)
+   - Emas Cerah: #f3cf7a (Kilauan & highlight)
+   - Emas Tua:   #a67c2e (Bayangan logam & teks kontras)
+   - Krem Hangat:#f6ecd6 (Kertas surat vintage & background polaroid)
+   - Maroon:     #7a1f2b (Amplop, pita kado, aksen lilin)
+   ============================================================ */
+
+:root {
+  --color-navy-darkest: #070c1b;
+  --color-navy: #0c1630;
+  --color-navy-surface: #132042;
+  --color-navy-card: rgba(19, 32, 66, 0.92);
+  --color-gold: #d9b25f;
+  --color-gold-light: #f3cf7a;
+  --color-gold-dark: #a67c2e;
+  --color-cream: #f6ecd6;
+  --color-cream-soft: #fffaf0;
+  --color-cream-darker: #e8d9ba;
+  --color-maroon: #7a1f2b;
+  --color-maroon-dark: #4e1019;
+  --color-maroon-light: #982b3a;
+  --color-text-light: #f6ecd6;
+  --color-text-dark: #2c2118;
+  --color-text-muted: #c2c9d8;
+  --color-gold-glow: rgba(217, 178, 95, 0.45);
+  --color-maroon-glow: rgba(122, 31, 43, 0.5);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-handwriting: 'Caveat', cursive, sans-serif;
+  --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --shadow-gold: 0 0 20px rgba(217, 178, 95, 0.35);
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* RESET & DASAR */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background-color: var(--color-navy);
+  color: var(--color-text-light);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* KANVAS LATAR DAN FOREGROUND */
+#ambient-canvas,
+#fx-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#ambient-canvas {
+  z-index: 1;
+}
+
+#fx-canvas {
+  z-index: 999;
+}
+
+/* TOP NAV: TOMBOL MUSIK */
+.top-nav {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(19, 32, 66, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(217, 178, 95, 0.35);
+  color: var(--color-gold-light);
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s var(--ease-smooth);
+}
+
+.nav-control-btn:hover {
+  background: rgba(25, 42, 85, 0.9);
+  border-color: var(--color-gold);
+  box-shadow: 0 0 16px var(--color-gold-glow);
+  transform: translateY(-1px);
+}
+
+.nav-control-btn:focus-visible {
+  outline: 2px solid var(--color-gold-light);
+  outline-offset: 3px;
+}
+
+.music-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.music-icon-wrapper svg {
+  width: 100%;
+  height: 100%;
+}
+
+.nav-control-btn .icon-muted {
+  display: none;
+}
+
+.nav-control-btn.is-muted .icon-playing {
+  display: none;
+}
+
+.nav-control-btn.is-muted .icon-muted {
+  display: block;
+  opacity: 0.65;
+}
+
+/* STAGE CONTAINER MANAGER */
+.stage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease-smooth), visibility 0.6s var(--ease-smooth);
+  z-index: 10;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.stage.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ============================================================
+   TAHAP 1: AMPLOP PEMBUKA & SEGEL LILIN
+   ============================================================ */
+.envelope-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  position: relative;
+  z-index: 20;
+}
+
+.envelope-glow {
+  position: absolute;
+  width: 280px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(217, 178, 95, 0.2) 0%, transparent 70%);
+  filter: blur(20px);
+  pointer-events: none;
+  animation: pulseGlow 4s ease-in-out infinite alternate;
+}
+
+.envelope {
+  position: relative;
+  width: min(320px, 86vw);
+  height: min(210px, 58vw);
+  background-color: var(--color-maroon);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(122, 31, 43, 0.35);
+  cursor: pointer;
+  perspective: 1000px;
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s var(--ease-smooth);
+}
+
+.envelope:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.7), 0 0 32px var(--color-gold-glow);
+}
+
+.envelope:focus-visible {
+  outline: 3px solid var(--color-gold-light);
+  outline-offset: 6px;
+}
+
+/* Bagian Belakang Amplop */
+.envelope-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--color-maroon-dark) 0%, var(--color-maroon) 100%);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+/* Intipan Surat di dalam amplop */
+.envelope-letter-peek {
+  position: absolute;
+  bottom: 10px;
+  left: 6%;
+  width: 88%;
+  height: 82%;
+  background-color: var(--color-cream);
+  border-radius: 4px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12px;
+  z-index: 2;
+}
+
+.letter-peek-lines {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    transparent,
+    transparent 12px,
+    rgba(166, 124, 46, 0.25) 12px,
+    rgba(166, 124, 46, 0.25) 13px
+  );
+  border-radius: 2px;
+}
+
+/* Lipatan Depan Kiri, Kanan, Bawah */
+.envelope-pockets {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.envelope-pockets::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 min(210px, 58vw) min(320px, 86vw);
+  border-color: transparent transparent var(--color-maroon-dark) transparent;
+  opacity: 0.85;
+}
+
+.envelope-pockets::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 min(320px, 86vw) min(210px, 58vw) 0;
+  border-color: transparent transparent var(--color-maroon) transparent;
+  opacity: 0.92;
+}
+
+/* Flap Atas (Bisa Buka 3D) */
+.envelope-flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  border-style: solid;
+  border-width: min(115px, 32vw) calc(min(320px, 86vw) / 2) 0 calc(min(320px, 86vw) / 2);
+  border-color: var(--color-maroon-light) transparent transparent transparent;
+  transform-origin: top center;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 4;
+}
+
+/* Segel Lilin Emas */
+.wax-seal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 35%, var(--color-gold-light), var(--color-gold), var(--color-gold-dark));
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 16px var(--color-gold-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-spring), opacity 0.4s ease;
+  animation: sealPulse 2.8s ease-in-out infinite;
+}
+
+.wax-seal-inner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--color-navy-darkest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.25), transparent);
+}
+
+.seal-letter {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-maroon-dark);
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.4), -1px -1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.envelope-prompt {
+  color: var(--color-cream);
+  font-family: var(--font-handwriting);
+  font-size: 1.45rem;
+  letter-spacing: 0.5px;
+  text-align: center;
+  animation: textFloat 2.6s ease-in-out infinite alternate;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 14px var(--color-gold-glow);
+}
+
+.envelope-prompt .sparkle-icon {
+  display: inline-block;
+  color: var(--color-gold-light);
+  animation: rotateSparkle 3s linear infinite;
+}
+
+/* ANIMASI KETIKA AMPLOP DIBUKA */
+.envelope.is-opening .wax-seal {
+  transform: translate(-50%, -50%) scale(1.3);
+  opacity: 0;
+  filter: blur(4px);
+}
+
+.envelope.is-opening .envelope-flap {
+  transform: rotateX(180deg);
+  z-index: 1;
+}
+
+.envelope.is-opening .envelope-letter-peek {
+  transform: translateY(-80px);
+  z-index: 5;
+}
+
+/* ============================================================
+   TAHAP 2 & 3: TAMPILAN SURAT MENGETIK (PARCHMENT VINTAGE)
+   ============================================================ */
+.letter-stage-wrapper {
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  z-index: 25;
+}
+
+.parchment-letter {
+  position: relative;
+  width: 100%;
+  background: var(--color-cream);
+  background-image: 
+    radial-gradient(ellipse at top right, rgba(217, 178, 95, 0.2), transparent 60%),
+    radial-gradient(ellipse at bottom left, rgba(122, 31, 43, 0.08), transparent 50%),
+    repeating-linear-gradient(
+      transparent,
+      transparent 28px,
+      rgba(166, 124, 46, 0.18) 28px,
+      rgba(166, 124, 46, 0.18) 29px
+    );
+  color: var(--color-text-dark);
+  border-radius: var(--radius-md);
+  padding: 36px 28px 30px;
+  box-shadow: 
+    0 18px 48px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(217, 178, 95, 0.5),
+    inset 0 0 30px rgba(166, 124, 46, 0.12);
+  transition: transform 0.4s var(--ease-spring);
+  border: 1px solid rgba(166, 124, 46, 0.35);
+}
+
+.letter-header-decor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  border-bottom: 1px dashed rgba(166, 124, 46, 0.35);
+  padding-bottom: 12px;
+}
+
+.wax-stamp-mini {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-gold-light), var(--color-gold-dark));
+  color: var(--color-maroon-dark);
+  font-family: var(--font-serif);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.letter-date {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+  color: #725838;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.letter-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 4.5vw, 1.85rem);
+  font-weight: 700;
+  color: var(--color-maroon-dark);
+  text-align: center;
+  margin-bottom: 12px;
+  min-height: 2.4rem;
+  line-height: 1.3;
+}
+
+.letter-divider {
+  text-align: center;
+  color: var(--color-gold-dark);
+  font-size: 1.2rem;
+  margin-bottom: 18px;
+}
+
+.letter-body {
+  font-family: var(--font-handwriting);
+  font-size: clamp(1.35rem, 4vw, 1.65rem);
+  line-height: 1.7;
+  color: #2b1f14;
+}
+
+.letter-paragraph {
+  margin-bottom: 18px;
+  min-height: 1.6em;
+  white-space: pre-wrap;
+}
+
+.letter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(166, 124, 46, 0.3);
+}
+
+/* TOMBOL UTAMA EMAS & TOMBOL SEKUNDER */
+.primary-gold-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--color-gold-light) 0%, var(--color-gold) 60%, var(--color-gold-dark) 100%);
+  color: var(--color-navy-darkest);
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 12px 26px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 16px var(--color-gold-glow);
+  transition: all 0.25s var(--ease-spring);
+}
+
+.primary-gold-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 24px var(--color-gold-glow);
+}
+
+.primary-gold-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.primary-gold-btn:focus-visible {
+  outline: 3px solid var(--color-navy);
+  outline-offset: 3px;
+}
+
+.secondary-btn {
+  background: transparent;
+  color: #725838;
+  border: 1px solid rgba(166, 124, 46, 0.4);
+  border-radius: var(--radius-full);
+  padding: 10px 18px;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background: rgba(166, 124, 46, 0.1);
+  color: var(--color-maroon-dark);
+  border-color: var(--color-maroon-dark);
+}
+
+.secondary-btn-small {
+  background: rgba(217, 178, 95, 0.15);
+  border: 1px solid rgba(217, 178, 95, 0.4);
+  color: var(--color-gold-light);
+  border-radius: var(--radius-full);
+  padding: 7px 16px;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondary-btn-small:hover {
+  background: rgba(217, 178, 95, 0.3);
+  border-color: var(--color-gold);
+  transform: translateY(-1px);
+}
+
+.pulse-glow {
+  animation: pulseButton 2s infinite alternate;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ============================================================
+   TAHAP 4: RUANG UTAMA (TENANG & MENARIK)
+   ============================================================ */
+#stage-main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.hero-centerpiece {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  z-index: 10;
+  animation: fadeInScale 0.9s var(--ease-spring);
+  padding-right: 56px; /* Memberi ruang untuk dock di sebelah kanan pada HP */
+}
+
+@media (min-width: 768px) {
+  .hero-centerpiece {
+    padding-right: 80px;
+    max-width: 580px;
+  }
+}
+
+.hero-crest {
+  color: var(--color-gold);
+  width: 110px;
+  margin-bottom: 8px;
+  opacity: 0.85;
+}
+
+.crest-svg {
+  width: 100%;
+  height: auto;
+}
+
+.hero-greeting {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: clamp(0.75rem, 2.5vw, 0.95rem);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.hero-name {
+  font-family: var(--font-serif);
+  font-size: clamp(3.2rem, 14vw, 5.8rem);
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-gold-light) 40%, var(--color-gold) 75%, var(--color-gold-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.6));
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+
+/* KARTU UMUR & HITUNGAN HARI */
+.hero-age-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(145deg, rgba(19, 32, 66, 0.85) 0%, rgba(12, 22, 48, 0.9) 100%);
+  border: 1px solid rgba(217, 178, 95, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 16px 24px;
+  box-shadow: var(--shadow-md), 0 0 24px rgba(217, 178, 95, 0.15);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  margin-bottom: 18px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.age-counter-block {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.age-number {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 8vw, 3.4rem);
+  font-weight: 800;
+  color: var(--color-gold-light);
+  line-height: 1;
+}
+
+.age-unit {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-style: italic;
+  color: var(--color-cream);
+}
+
+.age-divider {
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(217, 178, 95, 0.5), transparent);
+  margin: 10px 0;
+}
+
+.age-days-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.days-text {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+.days-number {
+  font-family: var(--font-sans);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-gold-light);
+  letter-spacing: 0.5px;
+}
+
+.days-label {
+  font-size: 0.78rem;
+  color: var(--color-cream);
+  opacity: 0.9;
+}
+
+.hero-tagline {
+  font-family: var(--font-handwriting);
+  font-size: clamp(1.2rem, 3.8vw, 1.45rem);
+  color: var(--color-cream);
+  max-width: 360px;
+  line-height: 1.45;
+  opacity: 0.95;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+  margin-bottom: 16px;
+}
+
+.hero-dock-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(12, 22, 48, 0.7);
+  border: 1px dashed rgba(217, 178, 95, 0.4);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  color: var(--color-gold-light);
+}
+
+.hint-arrow {
+  display: inline-block;
+  animation: pointRight 1.5s ease-in-out infinite;
+}
+
+/* ============================================================
+   DOCK TOMBOL SISI LAYAR (VERTIKAL SISI KANAN)
+   Ukuran 50-54px, enak ditekan di HP
+   ============================================================ */
+.side-dock {
+  position: fixed;
+  top: 50%;
+  right: max(10px, env(safe-area-inset-right));
+  transform: translateY(-50%);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dock-track {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(12, 22, 48, 0.88);
+  border: 1px solid rgba(217, 178, 95, 0.45);
+  padding: 10px 8px;
+  border-radius: 36px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.6), 0 0 24px rgba(217, 178, 95, 0.2);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.dock-btn {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(25, 44, 92, 0.95) 0%, rgba(15, 27, 56, 0.95) 100%);
+  border: 1.5px solid rgba(217, 178, 95, 0.45);
+  color: var(--color-cream);
+  font-size: 1.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-spring), border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dock-btn:hover {
+  transform: scale(1.12);
+  border-color: var(--color-gold-light);
+  box-shadow: 0 0 18px var(--color-gold-glow);
+  background: linear-gradient(135deg, rgba(35, 60, 120, 1) 0%, rgba(20, 35, 75, 1) 100%);
+}
+
+.dock-btn:active {
+  transform: scale(0.96);
+}
+
+.dock-btn:focus-visible {
+  outline: 2px solid var(--color-gold-light);
+  outline-offset: 3px;
+}
+
+.dock-btn.is-active {
+  border-color: var(--color-gold-light);
+  box-shadow: 0 0 20px var(--color-gold-glow), inset 0 0 8px rgba(217, 178, 95, 0.4);
+  background: linear-gradient(135deg, var(--color-maroon) 0%, var(--color-navy-surface) 100%);
+}
+
+/* Tombol Terkunci */
+.dock-btn.dock-btn-locked {
+  opacity: 0.65;
+  filter: grayscale(0.5);
+  cursor: not-allowed;
+}
+
+.dock-btn.dock-btn-locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Animasi Buka Kunci Hadiah */
+.dock-btn.unlocking {
+  animation: unlockBurst 1.2s var(--ease-spring) forwards;
+}
+
+/* BADGE STATUS: BARU & CENTANG */
+.dock-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.dock-badge.new-badge {
+  background: linear-gradient(135deg, #e63946, #b71c1c);
+  color: #fff;
+  padding: 2px 5px;
+  font-family: var(--font-sans);
+  letter-spacing: 0.2px;
+}
+
+.dock-badge.check-badge {
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  color: var(--color-navy-darkest);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.dock-badge.lock-badge {
+  background: #475569;
+  color: #f1f5f9;
+  padding: 1px 4px;
+}
+
+/* TOOLTIP DESKTOP */
+.dock-tooltip {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  background: rgba(12, 22, 48, 0.95);
+  border: 1px solid rgba(217, 178, 95, 0.5);
+  color: var(--color-gold-light);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s var(--ease-smooth);
+  box-shadow: var(--shadow-sm);
+}
+
+.dock-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent rgba(12, 22, 48, 0.95);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dock-btn:hover .dock-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* TOAST LABEL UNTUK HP SAAT DOCK DIKETUK */
+.mobile-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(12, 22, 48, 0.92);
+  border: 1px solid var(--color-gold);
+  color: var(--color-cream);
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s var(--ease-spring);
+  z-index: 120;
+  pointer-events: none;
+}
+
+.mobile-toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================
+   CONTAINER PANEL KONTEN (MEKAR DARI TOMBOL DOCK)
+   ============================================================ */
+.panel-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(7, 12, 27, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  padding-right: 76px; /* Agar dock di kanan tetap terlihat dan bisa ditekan langsung! */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.panel-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.panel-card {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  max-height: min(88vh, 760px);
+  background: linear-gradient(160deg, rgba(22, 38, 77, 0.96) 0%, rgba(12, 22, 48, 0.98) 100%);
+  border: 1.5px solid rgba(217, 178, 95, 0.5);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(217, 178, 95, 0.2);
+  overflow-y: auto;
+  padding: 24px 16px 20px;
+  transform: scale(0.85);
+  opacity: 0;
+  transition: transform 0.4s var(--ease-spring), opacity 0.3s ease;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gold) transparent;
+}
+
+@media (min-width: 600px) {
+  .panel-card {
+    padding: 32px 26px 24px;
+  }
+}
+
+.panel-backdrop.active .panel-card {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.close-panel-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(217, 178, 95, 0.35);
+  color: var(--color-cream);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.close-panel-btn:hover {
+  background: var(--color-maroon);
+  border-color: var(--color-gold);
+  transform: rotate(90deg);
+}
+
+.panel-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.panel-icon-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(217, 178, 95, 0.15);
+  border: 1px solid var(--color-gold);
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+}
+
+.panel-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 4vw, 1.7rem);
+  font-weight: 700;
+  color: var(--color-gold-light);
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.panel-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* ============================================================
+   PANEL 1: KENANGAN (POLAROID GALLERY & SWIPE)
+   ============================================================ */
+.polaroid-gallery-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.polaroid-carousel {
+  display: flex;
+  gap: 18px;
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 20px 10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.polaroid-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.polaroid-card {
+  flex: 0 0 min(250px, 72vw);
+  scroll-snap-align: center;
+  background: #fdfcf9;
+  border-radius: 6px;
+  padding: 12px 12px 18px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease;
+  transform: rotate(var(--rot, -1deg));
+  display: flex;
+  flex-direction: column;
+}
+
+.polaroid-card:hover {
+  transform: rotate(0deg) scale(1.04) translateY(-6px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.6), 0 0 20px var(--color-gold-glow);
+  z-index: 5;
+}
+
+.polaroid-card:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 4px;
+}
+
+.polaroid-img-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #1b263b;
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.polaroid-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Placeholder Polaroid jika foto tidak ada / error */
+.polaroid-placeholder {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 40%, #1e335f 0%, #0d1b33 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-gold-light);
+  padding: 16px;
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+
+.placeholder-tag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-cream);
+  letter-spacing: 0.5px;
+}
+
+.polaroid-caption {
+  font-family: var(--font-handwriting);
+  font-size: 1.35rem;
+  color: #2b1f14;
+  text-align: center;
+  margin-top: 14px;
+  line-height: 1.25;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.carousel-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.carousel-arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(19, 32, 66, 0.85);
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold-light);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.carousel-arrow-btn:hover {
+  background: var(--color-gold);
+  color: var(--color-navy-darkest);
+}
+
+.carousel-dots-indicator {
+  display: flex;
+  gap: 8px;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(217, 178, 95, 0.35);
+  transition: all 0.25s ease;
+}
+
+.carousel-dot.active {
+  width: 22px;
+  border-radius: 4px;
+  background: var(--color-gold);
+}
+
+/* ============================================================
+   PANEL 2: DOA (6 KARTU 3D FLIP)
+   ============================================================ */
+.prayers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+
+@media (min-width: 520px) {
+  .prayers-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.prayer-flip-card {
+  aspect-ratio: 1 / 1.15;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.prayer-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+  border-radius: var(--radius-md);
+}
+
+.prayer-flip-card.is-flipped .prayer-card-inner {
+  transform: rotateY(180deg);
+}
+
+.prayer-flip-card:focus-visible {
+  outline: 2px solid var(--color-gold-light);
+  border-radius: var(--radius-md);
+}
+
+.prayer-card-front,
+.prayer-card-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: var(--radius-md);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* Sisi Depan Kartu Doa */
+.prayer-card-front {
+  background: linear-gradient(145deg, rgba(22, 38, 77, 0.95), rgba(12, 22, 48, 0.95));
+  border: 1px solid rgba(217, 178, 95, 0.45);
+}
+
+.prayer-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(217, 178, 95, 0.15);
+  border: 1px solid var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.prayer-card-title {
+  font-family: var(--font-serif);
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--color-gold-light);
+  margin-bottom: 4px;
+}
+
+.prayer-tap-hint {
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+/* Sisi Belakang Kartu Doa (Krem Vintage) */
+.prayer-card-back {
+  background: var(--color-cream);
+  color: var(--color-text-dark);
+  border: 1px solid var(--color-gold-dark);
+  transform: rotateY(180deg);
+  padding: 14px 12px;
+}
+
+.prayer-back-flourish {
+  color: var(--color-gold-dark);
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.prayer-text {
+  font-family: var(--font-handwriting);
+  font-size: clamp(1.1rem, 3vw, 1.28rem);
+  line-height: 1.35;
+  color: #2b1f14;
+  font-weight: 600;
+}
+
+.prayers-footer-hint {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+/* ============================================================
+   PANEL 3: KUE ULANG TAHUN & TIUP LILIN
+   ============================================================ */
+.cake-stage-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 10px 0;
+}
+
+.cake-assembly {
+  position: relative;
+  width: min(260px, 90%);
+  height: 220px;
+  margin: 0 auto 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Piring Emas */
+.cake-plate {
+  width: min(250px, 98%);
+  height: 16px;
+  background: linear-gradient(90deg, var(--color-gold-dark) 0%, var(--color-gold-light) 50%, var(--color-gold-dark) 100%);
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Tingkat Bawah Kue */
+.cake-tier-bottom {
+  position: relative;
+  width: 210px;
+  height: 64px;
+  background: linear-gradient(180deg, #442416 0%, #2f170c 100%);
+  border-radius: 12px 12px 6px 6px;
+  box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.4);
+  margin-bottom: -4px;
+  z-index: 2;
+}
+
+/* Tingkat Atas Kue */
+.cake-tier-top {
+  position: relative;
+  width: 150px;
+  height: 54px;
+  background: linear-gradient(180deg, #59311e 0%, #3d1f11 100%);
+  border-radius: 10px 10px 4px 4px;
+  box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.35);
+  margin-bottom: -2px;
+  z-index: 3;
+}
+
+.cake-frosting-stripes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 14px;
+  background: linear-gradient(180deg, var(--color-cream) 0%, var(--color-cream-darker) 100%);
+  border-radius: 10px 10px 0 0;
+}
+
+.cake-drips {
+  position: absolute;
+  top: 13px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background: radial-gradient(circle at 10px -2px, var(--color-cream-darker) 8px, transparent 9px);
+  background-size: 20px 14px;
+}
+
+.cake-berries {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  font-size: 1.1rem;
+}
+
+/* RACK 5 LILIN */
+.candles-rack {
+  position: absolute;
+  top: 24px;
+  width: 130px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 5;
+}
+
+.candle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.candle:hover {
+  transform: scale(1.1);
+}
+
+.candle:focus-visible {
+  outline: 2px solid var(--color-gold);
+}
+
+.candle-stick {
+  width: 10px;
+  height: 38px;
+  border-radius: 3px 3px 1px 1px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.candle-stick-gold {
+  background: repeating-linear-gradient(45deg, var(--color-gold), var(--color-gold) 4px, var(--color-gold-light) 4px, var(--color-gold-light) 8px);
+}
+
+.candle-stick-cream {
+  background: repeating-linear-gradient(45deg, var(--color-cream), var(--color-cream) 4px, #e8d9ba 4px, #e8d9ba 8px);
+}
+
+.candle-stick-maroon {
+  background: repeating-linear-gradient(45deg, var(--color-maroon), var(--color-maroon) 4px, var(--color-gold) 4px, var(--color-gold) 8px);
+}
+
+.candle-wick {
+  width: 2px;
+  height: 7px;
+  background: #333;
+}
+
+/* NYALA API LILIN */
+.candle-flame {
+  position: relative;
+  width: 14px;
+  height: 22px;
+  margin-bottom: 1px;
+  transform-origin: bottom center;
+  animation: flameFlicker 1.8s ease-in-out infinite alternate;
+}
+
+.flame-core {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 20px;
+  background: radial-gradient(ellipse at 50% 80%, #fff 0%, #ffde59 35%, #ff914d 70%, #ff5757 100%);
+  border-radius: 50% 50% 35% 35% / 60% 60% 40% 40%;
+}
+
+.flame-halo {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26px;
+  height: 32px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Asap Saat Lilin Padam */
+.candle-smoke {
+  position: absolute;
+  top: -14px;
+  width: 16px;
+  height: 24px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.candle.is-blown .candle-flame {
+  display: none;
+}
+
+.candle.is-blown .candle-wick {
+  background: #555;
+}
+
+.candle.is-blown .candle-smoke {
+  animation: smokePuff 1.2s ease-out forwards;
+}
+
+/* Banner Doa Terkabul */
+.cake-wish-banner {
+  text-align: center;
+  background: rgba(12, 22, 48, 0.95);
+  border: 1.5px solid var(--color-gold);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  box-shadow: 0 0 28px var(--color-gold-glow);
+  margin-top: 14px;
+  animation: popIn 0.5s var(--ease-spring);
+}
+
+.wish-sparkles {
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.wish-text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 3.8vw, 1.45rem);
+  font-weight: 700;
+  color: var(--color-gold-light);
+  margin-bottom: 4px;
+}
+
+.wish-subtext {
+  font-family: var(--font-handwriting);
+  font-size: 1.25rem;
+  color: var(--color-cream);
+  margin-bottom: 12px;
+}
+
+.cake-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mic-status-hint {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  max-width: 280px;
+}
+
+/* ============================================================
+   PANEL 4: HADIAH PENUTUP (KOTAK KADO & PESAN SPESIAL)
+   ============================================================ */
+.gift-box-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 0;
+  width: 100%;
+}
+
+.gift-interactive-box {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  cursor: pointer;
+  perspective: 600px;
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.gift-interactive-box:hover {
+  transform: scale(1.06);
+}
+
+.gift-interactive-box:focus-visible {
+  outline: 3px solid var(--color-gold);
+}
+
+.gift-lid {
+  position: absolute;
+  top: 0;
+  left: -5%;
+  width: 110%;
+  height: 32px;
+  background: linear-gradient(135deg, var(--color-maroon-light) 0%, var(--color-maroon) 100%);
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  z-index: 4;
+  transition: transform 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+.gift-body {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(135deg, var(--color-maroon) 0%, var(--color-maroon-dark) 100%);
+  border-radius: 4px 4px 8px 8px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* Pita Emas */
+.gift-ribbon-horizontal {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 12px;
+  background: linear-gradient(90deg, var(--color-gold-dark), var(--color-gold-light), var(--color-gold-dark));
+}
+
+.gift-ribbon-vertical {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--color-gold-light), var(--color-gold), var(--color-gold-dark));
+}
+
+.gift-bow {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 20px;
+}
+
+.bow-loop {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--color-gold-light);
+  border-radius: 50% 50% 0 50%;
+  background: rgba(217, 178, 95, 0.4);
+}
+
+.bow-left {
+  left: 0;
+  transform: rotate(-30deg);
+}
+
+.bow-right {
+  right: 0;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(30deg);
+}
+
+.bow-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: var(--color-gold-light);
+  border-radius: 50%;
+}
+
+.gift-sparkle-stars {
+  color: var(--color-gold-light);
+  font-size: 0.9rem;
+  letter-spacing: 4px;
+  opacity: 0.8;
+  z-index: 3;
+}
+
+/* Animasi Kado Terbuka */
+.gift-interactive-box.is-opened .gift-lid {
+  transform: translateY(-55px) rotate(-22deg) scale(0.95);
+  opacity: 0.85;
+}
+
+.gift-tap-hint {
+  font-family: var(--font-handwriting);
+  font-size: 1.3rem;
+  color: var(--color-gold-light);
+  margin-top: 14px;
+  text-align: center;
+}
+
+/* Pesan Rahasia yang Terungkap */
+.gift-secret-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-cream);
+  color: var(--color-text-dark);
+  border-radius: var(--radius-md);
+  padding: 24px 20px;
+  margin-top: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px var(--color-gold-glow);
+  border: 1px solid var(--color-gold-dark);
+  animation: popIn 0.6s var(--ease-spring);
+}
+
+.card-flourish {
+  font-size: 1.4rem;
+  color: var(--color-gold-dark);
+  margin-bottom: 8px;
+}
+
+.gift-revealed-text {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-maroon-dark);
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.gift-revealed-sub {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: #554433;
+  margin-bottom: 12px;
+}
+
+.gift-signature {
+  font-family: var(--font-handwriting);
+  font-size: 2rem;
+  color: var(--color-maroon);
+  margin-bottom: 18px;
+}
+
+.gift-action-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================================
+   PANEL 5: BACA SURAT LAGI
+   ============================================================ */
+.letter-full-view {
+  margin: 0 auto;
+  max-width: 520px;
+}
+
+.letter-footer-sign {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(166, 124, 46, 0.35);
+}
+
+.sign-note {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: #725838;
+}
+
+.sign-name {
+  font-family: var(--font-handwriting);
+  font-size: 1.7rem;
+  color: var(--color-maroon-dark);
+}
+
+/* ============================================================
+   LIGHTBOX FOTO POLAROID
+   ============================================================ */
+.photo-lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.lightbox-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.lightbox-content {
+  position: relative;
+  z-index: 10;
+  max-width: 440px;
+  width: 100%;
+}
+
+.close-lightbox-btn {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid #fff;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-frame {
+  background: #fdfcf9;
+  padding: 16px 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  animation: popIn 0.35s var(--ease-spring);
+}
+
+.lightbox-img-container {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #111;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lightbox-caption {
+  font-family: var(--font-handwriting);
+  font-size: 1.6rem;
+  color: #2b1f14;
+  text-align: center;
+  margin-top: 16px;
+}
+
+/* ============================================================
+   KEYFRAMES ANIMASI
+   ============================================================ */
+@keyframes sealPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 16px var(--color-gold-glow);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.07);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 26px rgba(217, 178, 95, 0.65);
+  }
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(0.9); opacity: 0.4; }
+  100% { transform: scale(1.15); opacity: 0.85; }
+}
+
+@keyframes textFloat {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+@keyframes rotateSparkle {
+  0% { transform: rotate(0deg) scale(0.9); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(0.9); }
+}
+
+@keyframes pulseButton {
+  0% { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 12px var(--color-gold-glow); }
+  100% { box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45), 0 0 28px rgba(217, 178, 95, 0.7); }
+}
+
+@keyframes flameFlicker {
+  0% { transform: scale(1) rotate(-1deg); }
+  25% { transform: scale(1.04, 0.96) rotate(1deg); }
+  50% { transform: scale(0.98, 1.02) rotate(-0.5deg); }
+  75% { transform: scale(1.02, 0.98) rotate(1.5deg); }
+  100% { transform: scale(1.01, 1) rotate(0deg); }
+}
+
+@keyframes smokePuff {
+  0% { opacity: 0.8; transform: translateY(0) scale(0.5); filter: blur(0px); }
+  50% { opacity: 0.5; transform: translateY(-16px) scale(1.2); filter: blur(2px); }
+  100% { opacity: 0; transform: translateY(-32px) scale(2); filter: blur(4px); }
+}
+
+@keyframes pointRight {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+@keyframes unlockBurst {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35) rotate(10deg); filter: drop-shadow(0 0 25px #ffd700); }
+  70% { transform: scale(0.9) rotate(-6deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  80% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeInScale {
+  0% { transform: scale(0.94); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================================
+   PREFERS-REDUCED-MOTION SUPPORT
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
