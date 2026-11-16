@@ -31,7 +31,7 @@ const CONFIG = {
   PHOTOS: [
     { src: "assets/photos/satu.jpeg", cap: "Hari yang indah bersama Abi" },
     { src: "assets/photos/dua.jpeg", cap: "Dedikasi & kebanggaan Abi" },
-    { src: "assets/photos/tiga.jpeg", cap: "Senyum hangat Abi" },
+    { src: "assets/photos/tiga.jpeg", cap: "Senyum ceria cucu & anak tersayang" },
     { src: "assets/photos/empat.jpeg", cap: "Keluarga tercinta" },
     { src: "assets/photos/lima.png", cap: "Tiang kokoh keluarga kita" }
   ],
