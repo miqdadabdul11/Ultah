@@ -27,13 +27,13 @@ const CONFIG = {
     p2: "Semoga di usia ke-57 ini, Allah limpahkan kesehatan, ketenangan, dan keberkahan di setiap langkah Abi. Kami sayang Abi, selalu."
   },
 
-  // Daftar Foto Kenangan untuk Galeri Polaroid
+  // Daftar Foto Kenangan untuk Galeri Polaroid (Sesuai foto asli Abi)
   PHOTOS: [
-    { src: "assets/photos/satu.jpeg", cap: "Masa muda Abi" },
-    { src: "assets/photos/dua.jpeg", cap: "Bersama keluarga" },
-    { src: "assets/photos/tiga.jpeg", cap: "Hari yang indah" },
-    { src: "assets/photos/empat.jpeg", cap: "Senyum Abi" },
-    { src: "assets/photos/lima.png", cap: "Kenangan favorit" }
+    { src: "assets/photos/satu.jpeg", cap: "Hari yang indah bersama Abi" },
+    { src: "assets/photos/dua.jpeg", cap: "Dedikasi & kebanggaan Abi" },
+    { src: "assets/photos/tiga.jpeg", cap: "Senyum hangat Abi" },
+    { src: "assets/photos/empat.jpeg", cap: "Keluarga tercinta" },
+    { src: "assets/photos/lima.png", cap: "Tiang kokoh keluarga kita" }
   ],
 
   // 6 Kartu Doa (Bisa Di-flip)
