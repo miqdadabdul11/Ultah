@@ -92,7 +92,7 @@ class SoundEngine {
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume().catch(() => {});
+      this.ctx.resume().catch(() => { });
     }
   }
 
@@ -116,7 +116,7 @@ class SoundEngine {
 
       osc.start(now);
       osc.stop(now + 0.13);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Efek suara rentetan petasan & kembang api (firecrackers)
@@ -174,7 +174,7 @@ class SoundEngine {
       boomGain.connect(this.ctx.destination);
       boom.start(now);
       boom.stop(now + 0.22);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Efek suara membalik kartu doa (whoosh)
@@ -197,7 +197,7 @@ class SoundEngine {
 
       osc.start(now);
       osc.stop(now + 0.1);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Efek suara hembusan angin lilin (whoosh)
@@ -230,7 +230,7 @@ class SoundEngine {
 
       noise.start(now);
       noise.stop(now + 0.36);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Efek suara melodi bahagia / unlock harp chime
@@ -256,7 +256,7 @@ class SoundEngine {
 
           osc.start(now);
           osc.stop(now + 0.65);
-        } catch (e) {}
+        } catch (e) { }
       }, idx * 110);
     });
   }
@@ -279,6 +279,68 @@ class SoundEngine {
 
       osc.start(now);
       osc.stop(now + 0.05);
+    } catch (e) { }
+  }
+
+  // Suara hati / love pop
+  playHeartPop() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.09);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.11);
+    } catch (e) {}
+  }
+
+  // Suara aamiin doa yang syahdu (arpeggio lembut)
+  playAmenChime() {
+    if (this.isMuted || !this.ctx) return;
+    const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+    notes.forEach((freq, idx) => {
+      setTimeout(() => {
+        try {
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.65);
+        } catch (e) {}
+      }, idx * 80);
+    });
+  }
+
+  // Suara terbangkan lentera harapan ke langit
+  playLanternChime() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(960, now + 1.2);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 1.35);
     } catch (e) {}
   }
 }
@@ -1335,7 +1397,7 @@ class BirthdayApp {
         micStream.getTracks().forEach(track => track.stop());
       }
       if (audioContext && audioContext.state !== 'closed') {
-        audioContext.close().catch(() => {});
+        audioContext.close().catch(() => { });
       }
     };
 
