@@ -31,12 +31,12 @@
   <header class="top-nav">
     <button id="music-toggle-btn" class="nav-control-btn" aria-label="Nyalakan atau matikan musik" title="Musik Latar">
       <span class="music-icon-wrapper" aria-hidden="true">
-        <!-- Ikon speaker menyala -->
-        <svg class="icon-playing" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon>
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-        </svg>
+        <!-- Equalizer Bars yang menari saat musik berputar -->
+        <span class="eq-bars">
+          <span class="eq-bar bar-1"></span>
+          <span class="eq-bar bar-2"></span>
+          <span class="eq-bar bar-3"></span>
+        </span>
         <!-- Ikon speaker muted -->
         <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"></polygon>
@@ -105,6 +105,7 @@
         <div class="letter-body">
           <p id="typed-letter-p1" class="letter-paragraph"></p>
           <p id="typed-letter-p2" class="letter-paragraph"></p>
+          <span class="feather-cursor" id="feather-cursor" aria-hidden="true">🪶</span>
         </div>
 
         <!-- Tombol Aksi Surat -->
@@ -127,6 +128,7 @@
     <!-- PUSAT RUANG UTAMA: "Abi", "57 Tahun", "X hari Abi jalani" -->
     <div class="hero-centerpiece">
       <div class="hero-crest" aria-hidden="true">
+        <span class="royal-crown">👑</span>
         <svg viewBox="0 0 100 24" class="crest-svg">
           <path d="M10 12 Q25 2 50 12 Q75 22 90 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
           <circle cx="50" cy="12" r="3" fill="currentColor"></circle>
@@ -141,7 +143,7 @@
       </div>
 
       <!-- KARTU UMUR & HITUNGAN HARI -->
-      <div class="hero-age-card">
+      <div class="hero-age-card" id="hero-age-card">
         <div class="age-counter-block">
           <span class="age-number" id="countup-age">0</span>
           <span class="age-unit">Tahun</span>
@@ -151,12 +153,20 @@
           <span class="days-text">Alhamdulillah, sudah</span>
           <span class="days-number" id="total-days-count">0</span>
           <span class="days-label">hari penuh berkah Abi jalani</span>
+          <span class="hours-badge" id="total-hours-count">±499.600 jam teladan & cinta</span>
         </div>
       </div>
 
       <p class="hero-tagline">
         Setiap lelahmu adalah doa, setiap langkahmu adalah teladan abadi bagi kami.
       </p>
+
+      <!-- GELEMBUNG PESAN KASIH SAYANG INTERAKTIF (BISA DIKETUK) -->
+      <div class="hero-wish-capsules" id="hero-wish-capsules" aria-label="Bintang Harapan Interaktif">
+        <button class="wish-capsule-btn" data-msg="Pahlawan tanpa tanda jasa terhebat kami ❤️">✨ Pahlawan Kami</button>
+        <button class="wish-capsule-btn" data-msg="Keringat & lelah Abi adalah surga bagi kami 🤲">🌟 Teladan Abadi</button>
+        <button class="wish-capsule-btn" data-msg="Semoga Allah selalu menjaga senyum & kesehatan Abi 🤍">🌸 Doa Tulus</button>
+      </div>
 
       <!-- HINT DOCK TOMBOL UNTUK HP -->
       <div class="hero-dock-hint" id="hero-dock-hint">
@@ -230,7 +240,14 @@
         <header class="panel-header">
           <div class="panel-icon-pill">📷</div>
           <h2 id="active-panel-title" class="panel-title">Kenangan Indah Bersama Abi</h2>
-          <p class="panel-subtitle">Setiap senyum dan jejak langkah Abi adalah harta terindah bagi kami</p>
+          <p class="panel-subtitle">Ketuk ❤️ pada foto untuk mengirim cinta, atau geser untuk melihat momen lainnya</p>
+          
+          <!-- Bar Filter Efek Foto Polaroid -->
+          <div class="photo-filters" id="photo-filters">
+            <button class="filter-pill active" data-filter="normal">Asli 🖼️</button>
+            <button class="filter-pill" data-filter="warm">Hangat 🌅</button>
+            <button class="filter-pill" data-filter="vintage">Vintage 🎞️</button>
+          </div>
         </header>
 
         <div class="polaroid-gallery-wrapper">
@@ -363,7 +380,12 @@
             <div class="wish-sparkles">✨ 🤲 ✨</div>
             <p class="wish-text">Semoga semua doamu terkabul, Abi 🤲</p>
             <p class="wish-subtext">Aamiin ya Rabbal 'Alamin</p>
-            <button id="relight-candles-btn" class="secondary-btn-small">Nyalakan Lilin Lagi 🕯️</button>
+            <div class="wish-banner-actions">
+              <button id="release-lantern-btn" class="primary-gold-btn pulse-glow">
+                🏮 Terbangkan Lentera Doa ke Langit
+              </button>
+              <button id="relight-candles-btn" class="secondary-btn-small">Nyalakan Lilin Lagi 🕯️</button>
+            </div>
           </div>
 
           <!-- Kontrol Tiup Lilin -->
@@ -424,6 +446,9 @@
             <h3 class="gift-signature" id="gift-author-name">Anakmu</h3>
 
             <div class="gift-action-buttons">
+              <button id="share-wa-btn" class="primary-gold-btn pulse-glow" aria-label="Bagikan ke WhatsApp">
+                📲 Kirim Ucapan ke WhatsApp
+              </button>
               <button id="restart-flow-btn" class="secondary-btn" aria-label="Ulangi dari awal">
                 Ulangi dari awal 🔄
               </button>

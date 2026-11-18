@@ -281,12 +281,74 @@ class SoundEngine {
       osc.stop(now + 0.05);
     } catch (e) {}
   }
+
+  // Suara hati / love pop
+  playHeartPop() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.09);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.11);
+    } catch (e) {}
+  }
+
+  // Suara aamiin doa yang syahdu (arpeggio lembut)
+  playAmenChime() {
+    if (this.isMuted || !this.ctx) return;
+    const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+    notes.forEach((freq, idx) => {
+      setTimeout(() => {
+        try {
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.65);
+        } catch (e) {}
+      }, idx * 80);
+    });
+  }
+
+  // Suara terbangkan lentera harapan
+  playLanternChime() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(960, now + 1.2);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 1.35);
+    } catch (e) {}
+  }
 }
 
 const sounds = new SoundEngine();
 
 /* ===================================================================
-   CANVAS AMBIENT: BINTANG, HATI, & BALON MELAYANG DI LATAR BELAKANG
+   CANVAS AMBIENT: BINTANG, BINTANG JATUH, STARDUST TRAIL, HATI, & BALON
    =================================================================== */
 class AmbientBackground {
   constructor(canvas) {
@@ -294,14 +356,18 @@ class AmbientBackground {
     this.ctx = canvas.getContext('2d');
     this.stars = [];
     this.particles = []; // Hati & balon
+    this.shootingStars = []; // Bintang jatuh / meteor
+    this.touchSparks = []; // Jejak sentuhan stardust
     this.width = 0;
     this.height = 0;
     this.animId = null;
+    this.lastShootingStar = performance.now();
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     this.resize();
     window.addEventListener('resize', () => this.resize());
     this.initElements();
+    this.setupTouchTrail();
     this.loop();
   }
 
@@ -316,7 +382,7 @@ class AmbientBackground {
 
   initElements() {
     // Buat bintang berkelap-kelip
-    const starCount = Math.min(Math.floor((this.width * this.height) / 12000), 70);
+    const starCount = Math.min(Math.floor((this.width * this.height) / 12000), 75);
     this.stars = [];
     for (let i = 0; i < starCount; i++) {
       this.stars.push({
@@ -330,16 +396,61 @@ class AmbientBackground {
     }
 
     // Buat balon & hati melayang pelan
-    const particleCount = this.reducedMotion ? 4 : 14;
+    const particleCount = this.reducedMotion ? 4 : 12;
     this.particles = [];
     for (let i = 0; i < particleCount; i++) {
       this.particles.push(this.createParticle(true));
     }
   }
 
+  setupTouchTrail() {
+    if (this.reducedMotion) return;
+    const addSpark = (clientX, clientY) => {
+      for (let i = 0; i < 2; i++) {
+        this.touchSparks.push({
+          x: clientX + (Math.random() - 0.5) * 14,
+          y: clientY + (Math.random() - 0.5) * 14,
+          vx: (Math.random() - 0.5) * 1.2,
+          vy: Math.random() * -1.2 - 0.3,
+          size: Math.random() * 2 + 1,
+          alpha: 1,
+          decay: Math.random() * 0.025 + 0.02,
+          color: Math.random() > 0.35 ? '#ffd778' : '#ffffff'
+        });
+      }
+    };
+
+    window.addEventListener('pointermove', (e) => {
+      addSpark(e.clientX, e.clientY);
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches[0]) {
+        addSpark(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+  }
+
+  spawnShootingStar() {
+    if (this.reducedMotion) return;
+    const startX = Math.random() * this.width * 0.8;
+    const startY = Math.random() * this.height * 0.35;
+    const length = Math.random() * 80 + 70;
+    const speed = Math.random() * 8 + 9;
+    const angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.25;
+    this.shootingStars.push({
+      x: startX,
+      y: startY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      length: length,
+      alpha: 1,
+      decay: 0.016
+    });
+  }
+
   createParticle(randomY = false) {
     const isBalloon = Math.random() > 0.45;
-    // Warna lembut & hangat agar tidak menutupi teks saat melayang
     const colors = ['#f7d78a', '#f6ecd6', '#eed7a1', '#e5b0b7', '#d9b25f'];
     return {
       type: isBalloon ? 'balloon' : 'heart',
@@ -351,14 +462,14 @@ class AmbientBackground {
       swayDist: Math.random() * 20 + 12,
       phase: Math.random() * Math.PI * 2,
       color: colors[Math.floor(Math.random() * colors.length)],
-      alpha: Math.random() * 0.12 + 0.08 // Transparan halus di latar belakang
+      alpha: Math.random() * 0.12 + 0.08
     };
   }
 
   loop() {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
-    // 1. Gambar Bintang
+    // 1. Gambar Bintang Berkelap-kelip
     for (let s of this.stars) {
       s.phase += s.speed;
       const currentAlpha = s.alpha * (0.6 + 0.4 * Math.sin(s.phase));
@@ -368,7 +479,64 @@ class AmbientBackground {
       this.ctx.fill();
     }
 
-    // 2. Gambar Balon & Hati Melayang
+    // 2. Spawn & Gambar Bintang Jatuh (Meteor)
+    const now = performance.now();
+    if (now - this.lastShootingStar > 6000 && Math.random() > 0.7) {
+      this.spawnShootingStar();
+      this.lastShootingStar = now;
+    }
+
+    for (let i = this.shootingStars.length - 1; i >= 0; i--) {
+      const star = this.shootingStars[i];
+      star.x += star.vx;
+      star.y += star.vy;
+      star.alpha -= star.decay;
+
+      if (star.alpha <= 0) {
+        this.shootingStars.splice(i, 1);
+        continue;
+      }
+
+      this.ctx.save();
+      this.ctx.globalAlpha = star.alpha;
+      const grad = this.ctx.createLinearGradient(
+        star.x, star.y,
+        star.x - star.vx * 3.5, star.y - star.vy * 3.5
+      );
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.3, '#ffd778');
+      grad.addColorStop(1, 'transparent');
+      this.ctx.strokeStyle = grad;
+      this.ctx.lineWidth = 1.8;
+      this.ctx.beginPath();
+      this.ctx.moveTo(star.x, star.y);
+      this.ctx.lineTo(star.x - star.vx * 3.5, star.y - star.vy * 3.5);
+      this.ctx.stroke();
+      this.ctx.restore();
+    }
+
+    // 3. Gambar Jejak Sentuhan Stardust (Touch Sparks)
+    for (let i = this.touchSparks.length - 1; i >= 0; i--) {
+      const sp = this.touchSparks[i];
+      sp.x += sp.vx;
+      sp.y += sp.vy;
+      sp.alpha -= sp.decay;
+      if (sp.alpha <= 0) {
+        this.touchSparks.splice(i, 1);
+        continue;
+      }
+      this.ctx.save();
+      this.ctx.globalAlpha = sp.alpha;
+      this.ctx.fillStyle = sp.color;
+      this.ctx.shadowBlur = 6;
+      this.ctx.shadowColor = sp.color;
+      this.ctx.beginPath();
+      this.ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
+      this.ctx.fill();
+      this.ctx.restore();
+    }
+
+    // 4. Gambar Balon & Hati Melayang
     for (let i = 0; i < this.particles.length; i++) {
       let p = this.particles[i];
       p.y -= p.speedY;
@@ -379,13 +547,11 @@ class AmbientBackground {
       this.ctx.globalAlpha = p.alpha;
 
       if (p.type === 'balloon') {
-        // Balon lonjong
         this.ctx.beginPath();
         this.ctx.ellipse(drawX, p.y, p.size * 0.75, p.size, 0, 0, Math.PI * 2);
         this.ctx.fillStyle = p.color;
         this.ctx.fill();
 
-        // Tali balon halus meliuk
         this.ctx.beginPath();
         this.ctx.moveTo(drawX, p.y + p.size);
         this.ctx.quadraticCurveTo(drawX + Math.sin(p.phase) * 6, p.y + p.size + 15, drawX, p.y + p.size + 30);
@@ -393,13 +559,11 @@ class AmbientBackground {
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
       } else {
-        // Hati melayang
         this.drawHeart(drawX, p.y, p.size, p.color);
       }
 
       this.ctx.restore();
 
-      // Reset jika sudah lewat atas layar
       if (p.y < -50) {
         this.particles[i] = this.createParticle(false);
       }
@@ -766,6 +930,9 @@ class BirthdayApp {
     this.isTyping = true;
     this.typewriterTimeouts = [];
 
+    const feather = document.getElementById('feather-cursor');
+    if (feather) feather.classList.remove('hidden');
+
     this.typedTitle.textContent = '';
     this.typedP1.textContent = '';
     this.typedP2.textContent = '';
@@ -827,6 +994,8 @@ class BirthdayApp {
 
   finishTypewriter() {
     this.isTyping = false;
+    const feather = document.getElementById('feather-cursor');
+    if (feather) feather.classList.add('hidden');
     this.skipTypingBtn.classList.add('hidden');
     this.letterNextBtn.classList.remove('hidden');
   }
@@ -844,6 +1013,12 @@ class BirthdayApp {
     const formattedDays = diffDays.toLocaleString('id-ID');
     if (this.totalDaysCount) {
       this.totalDaysCount.textContent = formattedDays;
+    }
+
+    const hoursEl = document.getElementById('total-hours-count');
+    if (hoursEl) {
+      const approxHours = (diffDays * 24).toLocaleString('id-ID');
+      hoursEl.textContent = `±${approxHours} jam teladan & cinta`;
     }
   }
 
@@ -901,6 +1076,34 @@ class BirthdayApp {
         this.closePanel();
       }
     });
+
+    // Wish Capsules Interaktif di Ruang Utama
+    const wishButtons = document.querySelectorAll('.wish-capsule-btn');
+    wishButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sounds.playHeartPop();
+        const msg = btn.getAttribute('data-msg');
+        this.showMobileToast(msg);
+        if (this.fx) {
+          const rect = btn.getBoundingClientRect();
+          this.fx.burstFirework(rect.left + rect.width / 2, rect.top + rect.height / 2, ['#ffd778', '#ffffff', '#e098a0']);
+        }
+      });
+    });
+
+    // 3D Tilt halus pada kartu usia saat digerakkan
+    const ageCard = document.getElementById('hero-age-card');
+    if (ageCard) {
+      ageCard.addEventListener('pointermove', (e) => {
+        const rect = ageCard.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        ageCard.style.transform = `perspective(600px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) scale(1.02)`;
+      });
+      ageCard.addEventListener('pointerleave', () => {
+        ageCard.style.transform = 'perspective(600px) rotateY(0deg) rotateX(0deg) scale(1)';
+      });
+    }
   }
 
   showMobileToast(text) {
@@ -1051,6 +1254,26 @@ class BirthdayApp {
       card.appendChild(imgWrap);
       card.appendChild(caption);
 
+      // Tombol Reaksi Cinta ❤️
+      const loveBtn = document.createElement('button');
+      loveBtn.className = 'polaroid-love-btn';
+      loveBtn.setAttribute('aria-label', `Kirim cinta untuk kenangan ini`);
+      loveBtn.innerHTML = `❤️ <span class="love-num">0</span>`;
+      let loveCount = 0;
+      loveBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sounds.playHeartPop();
+        loveCount++;
+        loveBtn.querySelector('.love-num').textContent = loveCount;
+        loveBtn.style.transform = 'scale(1.28)';
+        setTimeout(() => loveBtn.style.transform = '', 200);
+        if (this.fx) {
+          const rect = loveBtn.getBoundingClientRect();
+          this.fx.burstFirework(rect.left + rect.width / 2, rect.top, ['#ff4d4d', '#ffd778', '#ffffff']);
+        }
+      });
+      card.appendChild(loveBtn);
+
       // Lightbox click
       card.addEventListener('click', () => {
         sounds.playClick();
@@ -1097,6 +1320,20 @@ class BirthdayApp {
         carousel.scrollBy({ left: 260, behavior: 'smooth' });
       });
     }
+
+    // Filter Foto (Asli / Hangat / Vintage)
+    const filterPills = document.querySelectorAll('#photo-filters .filter-pill');
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        sounds.playClick();
+        filterPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const filter = pill.getAttribute('data-filter');
+        carousel.classList.remove('filter-warm', 'filter-vintage');
+        if (filter === 'warm') carousel.classList.add('filter-warm');
+        if (filter === 'vintage') carousel.classList.add('filter-vintage');
+      });
+    });
 
     // Lightbox Closer
     const lightbox = document.getElementById('photo-lightbox');
@@ -1165,9 +1402,25 @@ class BirthdayApp {
           <div class="prayer-card-back">
             <div class="prayer-back-flourish">❦</div>
             <p class="prayer-text">"${doa.text}"</p>
+            <button class="amen-prayer-btn" aria-label="Aamiin-kan doa ${doa.title}">🤲 Aamiin-kan (<span class="amen-num">0</span>)</button>
           </div>
         </div>
       `;
+
+      // Event Tombol Aamiin-kan
+      const amenBtn = card.querySelector('.amen-prayer-btn');
+      let amenCount = 0;
+      amenBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sounds.playAmenChime();
+        amenCount++;
+        amenBtn.querySelector('.amen-num').textContent = amenCount;
+        this.showMobileToast(`Aamiin ya Rabbal 'Alamin 🤲 (+${amenCount})`);
+        if (this.fx) {
+          const rect = amenBtn.getBoundingClientRect();
+          this.fx.burstFirework(rect.left + rect.width / 2, rect.top, ['#ffd778', '#f6ecd6', '#ffffff']);
+        }
+      });
 
       const toggleFlip = () => {
         sounds.playCardFlip();
@@ -1239,7 +1492,20 @@ class BirthdayApp {
       });
     }
 
-    // 3. Nyalakan Lilin Lagi
+    // 3. Terbangkan Lentera Harapan ke Langit
+    const releaseLanternBtn = document.getElementById('release-lantern-btn');
+    if (releaseLanternBtn) {
+      releaseLanternBtn.addEventListener('click', () => {
+        sounds.playLanternChime();
+        this.launchSkyLantern();
+        this.showMobileToast("Lentera doa & harapan melayang tinggi ke angkasa... 🏮✨");
+        if (this.fx) {
+          this.fx.burstConfetti(60);
+        }
+      });
+    }
+
+    // 4. Nyalakan Lilin Lagi
     if (relightBtn) {
       relightBtn.addEventListener('click', () => {
         sounds.playCelebrationChime();
@@ -1251,6 +1517,19 @@ class BirthdayApp {
           micStatus.textContent = "Bisa langsung ditiup ke lubang mikrofon HP atau ketuk tombol di atas!";
         }
       });
+    }
+  }
+
+  launchSkyLantern() {
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        const lantern = document.createElement('div');
+        lantern.className = 'sky-lantern-floating';
+        lantern.style.left = `${Math.random() * 65 + 18}%`;
+        lantern.style.animationDuration = `${Math.random() * 2 + 6}s`;
+        document.body.appendChild(lantern);
+        setTimeout(() => lantern.remove(), 7500);
+      }, i * 450);
     }
   }
 
@@ -1405,6 +1684,17 @@ class BirthdayApp {
         if (confirm("Ulangi perjalanan perayaan dari awal?")) {
           window.location.reload();
         }
+      });
+    }
+
+    const shareWaBtn = document.getElementById('share-wa-btn');
+    if (shareWaBtn) {
+      shareWaBtn.addEventListener('click', () => {
+        sounds.playCelebrationChime();
+        const pageUrl = window.location.href;
+        const text = `Selamat Ulang Tahun ke-57 untuk Abi tercinta! ❤️ Semoga panjang umur, selalu sehat dan dalam lindungan Allah. Buka kartu ucapan spesial untuk Abi: ${pageUrl}`;
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+        window.open(waUrl, '_blank');
       });
     }
   }
