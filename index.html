@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- BACKGROUND CANVAS UNTUK BINTANG, HATI, & BALON MELAYANG -->
+  <!-- BACKGROUND CANVAS UNTUK BINTANG, METEOR, JEJAK SENTUHAN, HATI, & BALON -->
   <canvas id="ambient-canvas" aria-hidden="true"></canvas>
 
   <!-- FOREGROUND CANVAS UNTUK KEMBANG API & KONFETI -->
@@ -27,7 +27,7 @@
     <source src="assets/music/Lagu.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- TOMBOL MUSIK SELALU TERLIHAT -->
+  <!-- TOP BAR: TOMBOL MUSIK & TRACKER PROGRES LANGKAH PERJALANAN -->
   <header class="top-nav">
     <button id="music-toggle-btn" class="nav-control-btn" aria-label="Nyalakan atau matikan musik" title="Musik Latar">
       <span class="music-icon-wrapper" aria-hidden="true">
@@ -46,455 +46,473 @@
       </span>
       <span class="music-label">Musik</span>
     </button>
+
+    <!-- STEP PROGRESS TRACKER (CERITA BERTAPAHAP) -->
+    <div class="story-progress-wrapper hidden" id="story-progress-wrapper" aria-label="Progres Perjalanan Hari Bahagia Abi">
+      <div class="story-step-badge" id="story-step-badge">Bab 1/5: Usia Emas ✨</div>
+      <div class="story-progress-track">
+        <div class="story-progress-fill" id="story-progress-fill"></div>
+      </div>
+    </div>
   </header>
 
   <!-- ============================================================
-       TAHAP 1: AMPLOP PEMBUKA & SEGEL LILIN
+       LANGKAH 1: AMPLOP PEMBUKA & SEGEL LILIN KERASA
        ============================================================ -->
   <section id="stage-envelope" class="stage active" aria-label="Amplop Pembuka">
-    <div class="envelope-container">
-      <div class="envelope-glow" aria-hidden="true"></div>
+    <div class="stage-inner envelope-center">
+      <div class="envelope-container">
+        <div class="envelope-glow" aria-hidden="true"></div>
 
-      <div id="envelope" class="envelope" role="button" tabindex="0" aria-label="Ketuk amplop untuk membuka surat untuk Abi">
-        <!-- Bagian Belakang Amplop -->
-        <div class="envelope-back"></div>
+        <div id="envelope" class="envelope" role="button" tabindex="0" aria-label="Ketuk amplop untuk membuka surat untuk Abi">
+          <!-- Bagian Belakang Amplop -->
+          <div class="envelope-back"></div>
 
-        <!-- Kertas Surat yang akan keluar -->
-        <div class="envelope-letter-peek">
-          <div class="letter-peek-lines"></div>
-        </div>
-
-        <!-- Flap Atas (Bisa Membuka 3D) -->
-        <div class="envelope-flap" id="envelope-flap"></div>
-
-        <!-- Lipatan Kiri & Kanan & Bawah -->
-        <div class="envelope-pockets"></div>
-
-        <!-- Segel Lilin Emas dengan Huruf "A" -->
-        <div class="wax-seal" id="wax-seal" aria-hidden="true">
-          <div class="wax-seal-inner">
-            <span class="seal-letter">A</span>
+          <!-- Kertas Surat yang akan keluar -->
+          <div class="envelope-letter-peek">
+            <div class="letter-peek-lines"></div>
           </div>
-          <div class="wax-seal-ring"></div>
-        </div>
-      </div>
 
-      <p class="envelope-prompt" id="envelope-prompt">
-        <span class="sparkle-icon">✨</span> Ada surat untuk Abi… ketuk untuk membuka <span class="sparkle-icon">✨</span>
-      </p>
+          <!-- Flap Atas (Bisa Membuka 3D) -->
+          <div class="envelope-flap" id="envelope-flap"></div>
+
+          <!-- Lipatan Kiri & Kanan & Bawah -->
+          <div class="envelope-pockets"></div>
+
+          <!-- Segel Lilin Emas dengan Huruf "A" -->
+          <div class="wax-seal" id="wax-seal" aria-hidden="true">
+            <div class="wax-seal-inner">
+              <span class="seal-letter">A</span>
+            </div>
+            <div class="wax-seal-ring"></div>
+          </div>
+        </div>
+
+        <p class="envelope-prompt" id="envelope-prompt">
+          <span class="sparkle-icon">✨</span> Ada surat untuk Abi… ketuk untuk membuka <span class="sparkle-icon">✨</span>
+        </p>
+      </div>
     </div>
   </section>
 
   <!-- ============================================================
-       TAHAP 2 & 3: TAMPILAN SURAT DENGAN EFEK MENGETIK
+       LANGKAH 2: TAMPILAN SURAT TULISAN TANGAN VINTAGE DENGAN EFEK KETIK
        ============================================================ -->
   <section id="stage-letter" class="stage" aria-label="Surat Ucapan untuk Abi">
-    <div class="letter-stage-wrapper">
-      <article class="parchment-letter" id="parchment-letter">
-        <!-- Ornamen Vintage Kertas -->
-        <div class="letter-header-decor">
-          <div class="wax-stamp-mini">A</div>
-          <div class="letter-date" id="letter-date-display">18 November 1969 — 18 November 2026</div>
-        </div>
-
-        <!-- Area Judul dan Teks Mengetik -->
-        <h1 class="letter-title" id="typed-letter-title"></h1>
-        <div class="letter-divider">
-          <span>❦</span>
-        </div>
-        <div class="letter-body">
-          <p id="typed-letter-p1" class="letter-paragraph"></p>
-          <p id="typed-letter-p2" class="letter-paragraph"></p>
-          <span class="feather-cursor" id="feather-cursor" aria-hidden="true">🪶</span>
-        </div>
-
-        <!-- Tombol Aksi Surat -->
-        <div class="letter-actions">
-          <button id="skip-typing-btn" class="secondary-btn" aria-label="Tampilkan seluruh teks langsung">
-            Tampilkan Semua ⚡
-          </button>
-          <button id="letter-next-btn" class="primary-gold-btn pulse-glow hidden" aria-label="Lanjutkan ke ruang utama">
-            Lanjut ➜
-          </button>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       TAHAP 4: RUANG UTAMA (TENANG & MENARIK)
-       ============================================================ -->
-  <main id="stage-main" class="stage" aria-label="Ruang Utama Perayaan Abi">
-    <!-- PUSAT RUANG UTAMA: "Abi", "57 Tahun", "X hari Abi jalani" -->
-    <div class="hero-centerpiece">
-      <div class="hero-crest" aria-hidden="true">
-        <span class="royal-crown">👑</span>
-        <svg viewBox="0 0 100 24" class="crest-svg">
-          <path d="M10 12 Q25 2 50 12 Q75 22 90 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-          <circle cx="50" cy="12" r="3" fill="currentColor"></circle>
-          <circle cx="25" cy="7" r="1.5" fill="currentColor"></circle>
-          <circle cx="75" cy="17" r="1.5" fill="currentColor"></circle>
-        </svg>
-      </div>
-
-      <div class="hero-name-wrapper">
-        <span class="hero-greeting">Milad Mubarak</span>
-        <h1 class="hero-name" id="hero-abi-name">Abi</h1>
-      </div>
-
-      <!-- KARTU UMUR & HITUNGAN HARI -->
-      <div class="hero-age-card" id="hero-age-card">
-        <div class="age-counter-block">
-          <span class="age-number" id="countup-age">0</span>
-          <span class="age-unit">Tahun</span>
-        </div>
-        <div class="age-divider"></div>
-        <div class="age-days-block">
-          <span class="days-text">Alhamdulillah, sudah</span>
-          <span class="days-number" id="total-days-count">0</span>
-          <span class="days-label">hari penuh berkah Abi jalani</span>
-          <span class="hours-badge" id="total-hours-count">±499.600 jam teladan & cinta</span>
-        </div>
-      </div>
-
-      <p class="hero-tagline">
-        Setiap lelahmu adalah doa, setiap langkahmu adalah teladan abadi bagi kami.
-      </p>
-
-      <!-- GELEMBUNG PESAN KASIH SAYANG INTERAKTIF (BISA DIKETUK) -->
-      <div class="hero-wish-capsules" id="hero-wish-capsules" aria-label="Bintang Harapan Interaktif">
-        <button class="wish-capsule-btn" data-msg="Pahlawan tanpa tanda jasa terhebat kami ❤️">✨ Pahlawan Kami</button>
-        <button class="wish-capsule-btn" data-msg="Keringat & lelah Abi adalah surga bagi kami 🤲">🌟 Teladan Abadi</button>
-        <button class="wish-capsule-btn" data-msg="Semoga Allah selalu menjaga senyum & kesehatan Abi 🤍">🌸 Doa Tulus</button>
-      </div>
-
-      <!-- HINT DOCK TOMBOL UNTUK HP -->
-      <div class="hero-dock-hint" id="hero-dock-hint">
-        <span class="hint-arrow">👉</span>
-        <span class="hint-text">Buka menu di sebelah kanan untuk kejutan Abi</span>
-      </div>
-    </div>
-
-    <!-- ============================================================
-         DOCK TOMBOL SISI LAYAR (VERTIKAL SISI KANAN)
-         Ukuran 50-54px, sentuhan nyaman, glow emas, titik "baru"
-         ============================================================ -->
-    <aside class="side-dock" id="side-dock" aria-label="Menu Kejutan Abi">
-      <div class="dock-track">
-        <!-- 1. KENANGAN -->
-        <button class="dock-btn has-badge pulse" id="dock-btn-memories" data-panel="panel-memories" aria-label="Buka Galeri Kenangan">
-          <span class="dock-btn-icon" aria-hidden="true">📷</span>
-          <span class="dock-badge new-badge" aria-label="Menu baru">Baru</span>
-          <span class="dock-badge check-badge hidden" aria-label="Sudah dilihat">✓</span>
-          <span class="dock-tooltip">Kenangan</span>
-        </button>
-
-        <!-- 2. DOA -->
-        <button class="dock-btn has-badge pulse" id="dock-btn-prayers" data-panel="panel-prayers" aria-label="Buka Kartu Doa">
-          <span class="dock-btn-icon" aria-hidden="true">🤲</span>
-          <span class="dock-badge new-badge" aria-label="Menu baru">Baru</span>
-          <span class="dock-badge check-badge hidden" aria-label="Sudah dilihat">✓</span>
-          <span class="dock-tooltip">Doa</span>
-        </button>
-
-        <!-- 3. KUE -->
-        <button class="dock-btn has-badge pulse" id="dock-btn-cake" data-panel="panel-cake" aria-label="Buka Kue Ulang Tahun & Tiup Lilin">
-          <span class="dock-btn-icon" aria-hidden="true">🎂</span>
-          <span class="dock-badge new-badge" aria-label="Menu baru">Baru</span>
-          <span class="dock-badge check-badge hidden" aria-label="Sudah dilihat">✓</span>
-          <span class="dock-tooltip">Kue</span>
-        </button>
-
-        <!-- 4. HADIAH (TERKUNCI AWALNYA) -->
-        <button class="dock-btn dock-btn-locked" id="dock-btn-gift" data-panel="panel-gift" aria-label="Buka Hadiah Spesial (Terkunci)" aria-disabled="true">
-          <span class="dock-btn-icon" id="gift-btn-icon" aria-hidden="true">🔒</span>
-          <span class="dock-badge lock-badge" id="gift-lock-badge" aria-hidden="true">Kunci</span>
-          <span class="dock-badge check-badge hidden" aria-label="Sudah dibuka">✓</span>
-          <span class="dock-tooltip" id="gift-tooltip-text">Hadiah (Terkunci)</span>
-        </button>
-
-        <!-- 5. BACA SURAT LAGI -->
-        <button class="dock-btn" id="dock-btn-letter" data-panel="panel-letter-again" aria-label="Baca Surat Lagi">
-          <span class="dock-btn-icon" aria-hidden="true">💌</span>
-          <span class="dock-tooltip">Surat</span>
-        </button>
-      </div>
-    </aside>
-
-    <!-- TOAST LABEL SEMENTARA UNTUK HP SAAT DOCK DIKETUK -->
-    <div id="mobile-dock-toast" class="mobile-toast" aria-live="polite"></div>
-  </main>
-
-  <!-- ============================================================
-       CONTAINER PANEL KONTEN (MEKAR DARI TOMBOL DOCK)
-       ============================================================ -->
-  <div id="modal-panel-backdrop" class="panel-backdrop" aria-hidden="true">
-    <div id="panel-card" class="panel-card" role="dialog" aria-modal="true" aria-labelledby="active-panel-title">
-      <!-- Tombol Tutup Panel -->
-      <button id="close-panel-btn" class="close-panel-btn" aria-label="Tutup panel">✕</button>
-
-      <!-- --------------------------------------------------------
-           PANEL 1: KENANGAN (POLAROID CAROUSEL & SWIPE)
-           -------------------------------------------------------- -->
-      <div id="panel-memories" class="panel-content hidden">
-        <header class="panel-header">
-          <div class="panel-icon-pill">📷</div>
-          <h2 id="active-panel-title" class="panel-title">Kenangan Indah Bersama Abi</h2>
-          <p class="panel-subtitle">Ketuk ❤️ pada foto untuk mengirim cinta, atau geser untuk melihat momen lainnya</p>
-          
-          <!-- Bar Filter Efek Foto Polaroid -->
-          <div class="photo-filters" id="photo-filters">
-            <button class="filter-pill active" data-filter="normal">Asli 🖼️</button>
-            <button class="filter-pill" data-filter="warm">Hangat 🌅</button>
-            <button class="filter-pill" data-filter="vintage">Vintage 🎞️</button>
-          </div>
-        </header>
-
-        <div class="polaroid-gallery-wrapper">
-          <div class="polaroid-carousel" id="polaroid-carousel" tabindex="0" aria-label="Daftar foto polaroid kenangan">
-            <!-- Diisi secara dinamis oleh JavaScript -->
-          </div>
-
-          <!-- Tombol Navigasi Carousel -->
-          <div class="carousel-nav-controls">
-            <button id="prev-photo-btn" class="carousel-arrow-btn" aria-label="Foto sebelumnya">❮</button>
-            <div class="carousel-dots-indicator" id="carousel-dots" aria-hidden="true"></div>
-            <button id="next-photo-btn" class="carousel-arrow-btn" aria-label="Foto berikutnya">❯</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- --------------------------------------------------------
-           PANEL 2: DOA (6 KARTU BISA DI-FLIP 3D)
-           -------------------------------------------------------- -->
-      <div id="panel-prayers" class="panel-content hidden">
-        <header class="panel-header">
-          <div class="panel-icon-pill">🤲</div>
-          <h2 class="panel-title">Untaian Doa untuk Abi</h2>
-          <p class="panel-subtitle">Ketuk kartu di bawah untuk membuka doa tulus kami untuk Abi ✨</p>
-        </header>
-
-        <div class="prayers-grid" id="prayers-grid">
-          <!-- 6 Kartu Doa akan di-render di script.js -->
-        </div>
-
-        <div class="prayers-footer-hint">
-          <button id="flip-all-prayers-btn" class="secondary-btn-small">Buka Semua Doa 🌟</button>
-        </div>
-      </div>
-
-      <!-- --------------------------------------------------------
-           PANEL 3: KUE ULANG TAHUN & TIUP LILIN
-           -------------------------------------------------------- -->
-      <div id="panel-cake" class="panel-content hidden">
-        <header class="panel-header">
-          <div class="panel-icon-pill">🎂</div>
-          <h2 class="panel-title">Tiup Lilin & Panjatkan Harapan</h2>
-          <p class="panel-subtitle">Ketuk lilin satu per satu, atau tekan tombol tiup di bawah!</p>
-        </header>
-
-        <div class="cake-stage-container">
-          <!-- Ilustrasi Kue Dua Tingkat + 5 Lilin -->
-          <div class="cake-assembly" id="cake-assembly" aria-label="Kue Ulang Tahun dengan 5 lilin">
-            <!-- Piring Kue Emas -->
-            <div class="cake-plate"></div>
-
-            <!-- Tingkat Bawah Kue -->
-            <div class="cake-tier cake-tier-bottom">
-              <div class="cake-frosting-stripes"></div>
-              <div class="cake-drips"></div>
-            </div>
-
-            <!-- Tingkat Atas Kue -->
-            <div class="cake-tier cake-tier-top">
-              <div class="cake-frosting-stripes"></div>
-              <div class="cake-drips"></div>
-              <div class="cake-berries">
-                <span class="berry">🍓</span>
-                <span class="berry">🍒</span>
-                <span class="berry">🍓</span>
-              </div>
-            </div>
-
-            <!-- Wadah 5 Lilin -->
-            <div class="candles-rack" id="candles-rack">
-              <!-- Lilin 1 -->
-              <div class="candle" data-candle="1" role="button" tabindex="0" aria-label="Lilin nomor 1, ketuk untuk memadamkan">
-                <div class="candle-flame">
-                  <div class="flame-halo"></div>
-                  <div class="flame-core"></div>
-                </div>
-                <div class="candle-smoke"></div>
-                <div class="candle-wick"></div>
-                <div class="candle-stick candle-stick-gold"></div>
-              </div>
-
-              <!-- Lilin 2 -->
-              <div class="candle" data-candle="2" role="button" tabindex="0" aria-label="Lilin nomor 2, ketuk untuk memadamkan">
-                <div class="candle-flame">
-                  <div class="flame-halo"></div>
-                  <div class="flame-core"></div>
-                </div>
-                <div class="candle-smoke"></div>
-                <div class="candle-wick"></div>
-                <div class="candle-stick candle-stick-cream"></div>
-              </div>
-
-              <!-- Lilin 3 (Tengah) -->
-              <div class="candle candle-center" data-candle="3" role="button" tabindex="0" aria-label="Lilin nomor 3, ketuk untuk memadamkan">
-                <div class="candle-flame">
-                  <div class="flame-halo"></div>
-                  <div class="flame-core"></div>
-                </div>
-                <div class="candle-smoke"></div>
-                <div class="candle-wick"></div>
-                <div class="candle-stick candle-stick-maroon"></div>
-              </div>
-
-              <!-- Lilin 4 -->
-              <div class="candle" data-candle="4" role="button" tabindex="0" aria-label="Lilin nomor 4, ketuk untuk memadamkan">
-                <div class="candle-flame">
-                  <div class="flame-halo"></div>
-                  <div class="flame-core"></div>
-                </div>
-                <div class="candle-smoke"></div>
-                <div class="candle-wick"></div>
-                <div class="candle-stick candle-stick-cream"></div>
-              </div>
-
-              <!-- Lilin 5 -->
-              <div class="candle" data-candle="5" role="button" tabindex="0" aria-label="Lilin nomor 5, ketuk untuk memadamkan">
-                <div class="candle-flame">
-                  <div class="flame-halo"></div>
-                  <div class="flame-core"></div>
-                </div>
-                <div class="candle-smoke"></div>
-                <div class="candle-wick"></div>
-                <div class="candle-stick candle-stick-gold"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Banner Kemenangan / Doa Terkabul (Muncul saat semua padam) -->
-          <div id="cake-wish-banner" class="cake-wish-banner hidden" aria-live="assertive">
-            <div class="wish-sparkles">✨ 🤲 ✨</div>
-            <p class="wish-text">Semoga semua doamu terkabul, Abi 🤲</p>
-            <p class="wish-subtext">Aamiin ya Rabbal 'Alamin</p>
-            <div class="wish-banner-actions">
-              <button id="release-lantern-btn" class="primary-gold-btn pulse-glow">
-                🏮 Terbangkan Lentera Doa ke Langit
-              </button>
-              <button id="relight-candles-btn" class="secondary-btn-small">Nyalakan Lilin Lagi 🕯️</button>
-            </div>
-          </div>
-
-          <!-- Kontrol Tiup Lilin -->
-          <div class="cake-controls" id="cake-controls">
-            <button id="blow-mic-btn" class="primary-gold-btn pulse-glow" aria-label="Tiup lilin dengan mikrofon atau sentuhan">
-              <span class="btn-icon">🌬️</span> Tiup lilin
-            </button>
-            <p id="mic-status-text" class="mic-status-hint">
-              Bisa langsung ditiup ke lubang mikrofon HP atau ketuk tombol di atas!
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- --------------------------------------------------------
-           PANEL 4: HADIAH PENUTUP (KOTAK KADO & PESAN SPESIAL)
-           -------------------------------------------------------- -->
-      <div id="panel-gift" class="panel-content hidden">
-        <header class="panel-header">
-          <div class="panel-icon-pill">🎁</div>
-          <h2 class="panel-title">Kado Spesial untuk Abi</h2>
-          <p class="panel-subtitle">Sebuah ungkapan cinta dan rasa terima kasih terdalam</p>
-        </header>
-
-        <div class="gift-box-stage">
-          <!-- KOTAK KADO 3D INTERAKTIF -->
-          <div class="gift-interactive-box" id="gift-interactive-box" role="button" tabindex="0" aria-label="Ketuk kotak kado untuk membuka">
-            <!-- Tutup Kado -->
-            <div class="gift-lid" id="gift-lid">
-              <div class="gift-bow">
-                <div class="bow-loop bow-left"></div>
-                <div class="bow-loop bow-right"></div>
-                <div class="bow-center"></div>
-              </div>
-              <div class="gift-ribbon-horizontal"></div>
-            </div>
-
-            <!-- Badan Kado -->
-            <div class="gift-body">
-              <div class="gift-ribbon-vertical"></div>
-              <div class="gift-sparkle-stars" aria-hidden="true">✦ ✧ ✦</div>
-            </div>
-          </div>
-
-          <p id="gift-tap-hint" class="gift-tap-hint pulse">
-            Ketuk kotak kado untuk membuka 🎁
-          </p>
-
-          <!-- PESAN RAHASIA DI DALAM KADO (TERBUKA SETELAH DIKETUK) -->
-          <div id="gift-secret-message" class="gift-secret-card hidden" aria-live="polite">
-            <div class="card-flourish">❦</div>
-            <p class="gift-revealed-text">
-              "Terima kasih sudah menjadi Abi terbaik di dunia."
-            </p>
-            <p class="gift-revealed-sub">
-              Dengan cinta dan doa yang tak pernah putus,
-            </p>
-            <h3 class="gift-signature" id="gift-author-name">Anakmu</h3>
-
-            <div class="gift-action-buttons">
-              <button id="share-wa-btn" class="primary-gold-btn pulse-glow" aria-label="Bagikan ke WhatsApp">
-                📲 Kirim Ucapan ke WhatsApp
-              </button>
-              <button id="restart-flow-btn" class="secondary-btn" aria-label="Ulangi dari awal">
-                Ulangi dari awal 🔄
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- --------------------------------------------------------
-           PANEL 5: BACA SURAT LAGI (VERSI LENGKAP TANPA MENGETIK)
-           -------------------------------------------------------- -->
-      <div id="panel-letter-again" class="panel-content hidden">
-        <header class="panel-header">
-          <div class="panel-icon-pill">💌</div>
-          <h2 class="panel-title">Surat Cinta untuk Abi</h2>
-          <p class="panel-subtitle">Bisa Abi baca kembali kapan pun Abi rindu</p>
-        </header>
-
-        <article class="parchment-letter letter-full-view">
+    <div class="stage-inner">
+      <div class="letter-stage-wrapper">
+        <article class="parchment-letter" id="parchment-letter">
+          <!-- Ornamen Vintage Kertas -->
           <div class="letter-header-decor">
             <div class="wax-stamp-mini">A</div>
-            <div class="letter-date" id="letter-again-date">18 November 1969 — 18 November 2026</div>
+            <div class="letter-date" id="letter-date-display">18 November 1969 — 18 November 2026</div>
           </div>
 
-          <h3 class="letter-title" id="letter-again-title">Selamat Ulang Tahun, Abi 🎉</h3>
+          <!-- Area Judul dan Teks Mengetik -->
+          <h1 class="letter-title" id="typed-letter-title"></h1>
           <div class="letter-divider">
             <span>❦</span>
           </div>
-
           <div class="letter-body">
-            <p class="letter-paragraph" id="letter-again-p1"></p>
-            <p class="letter-paragraph" id="letter-again-p2"></p>
+            <p id="typed-letter-p1" class="letter-paragraph"></p>
+            <p id="typed-letter-p2" class="letter-paragraph"></p>
+            <span class="feather-cursor" id="feather-cursor" aria-hidden="true">🪶</span>
           </div>
 
-          <div class="letter-footer-sign">
-            <span class="sign-note">Selalu mencintai Abi,</span>
-            <span class="sign-name" id="letter-again-signature">Anakmu tercinta</span>
+          <!-- Tombol Aksi Surat -->
+          <div class="letter-actions">
+            <button id="skip-typing-btn" class="secondary-btn" aria-label="Tampilkan seluruh teks langsung">
+              Tampilkan Semua ⚡
+            </button>
+            <button id="letter-next-btn" class="primary-gold-btn pulse-glow hidden" aria-label="Mulai perjalanan hari bahagia Abi">
+              Mulai Perjalanan Hari Bahagia Abi 🌟 ➜
+            </button>
           </div>
         </article>
       </div>
+    </div>
+  </section>
 
+  <!-- ============================================================
+       LANGKAH 3: RUANG USIA EMAS & PENGHORMATAN KEPADA ABI
+       ============================================================ -->
+  <section id="stage-milestone" class="stage" aria-label="Ruang Kehormatan & Usia Emas Abi">
+    <div class="stage-inner">
+      <div class="hero-centerpiece">
+        <!-- Mahkota & Crest Kerajaan -->
+        <div class="hero-crest" aria-hidden="true">
+          <span class="royal-crown">👑</span>
+          <svg viewBox="0 0 100 24" class="crest-svg">
+            <path d="M10 12 Q25 2 50 12 Q75 22 90 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+            <circle cx="50" cy="12" r="3" fill="currentColor"></circle>
+            <circle cx="25" cy="7" r="1.5" fill="currentColor"></circle>
+            <circle cx="75" cy="17" r="1.5" fill="currentColor"></circle>
+          </svg>
+        </div>
+
+        <div class="hero-name-wrapper">
+          <span class="hero-greeting">Milad Mubarak</span>
+          <h1 class="hero-name" id="hero-abi-name">Abi</h1>
+        </div>
+
+        <!-- KARTU UMUR & HITUNGAN HARI -->
+        <div class="hero-age-card" id="hero-age-card">
+          <div class="age-counter-block">
+            <span class="age-number" id="countup-age">0</span>
+            <span class="age-unit">Tahun</span>
+          </div>
+          <div class="age-divider"></div>
+          <div class="age-days-block">
+            <span class="days-text">Alhamdulillah, sudah</span>
+            <span class="days-number" id="total-days-count">0</span>
+            <span class="days-label">hari penuh berkah Abi jalani</span>
+            <span class="hours-badge" id="total-hours-count">±499.600 jam teladan & cinta</span>
+          </div>
+        </div>
+
+        <p class="hero-tagline">
+          Setiap lelahmu adalah doa, setiap langkahmu adalah teladan abadi bagi kami.
+        </p>
+
+        <!-- GELEMBUNG PESAN KASIH SAYANG INTERAKTIF -->
+        <div class="hero-wish-capsules" id="hero-wish-capsules" aria-label="Bintang Harapan Interaktif">
+          <button class="wish-capsule-btn" data-msg="Pahlawan tanpa tanda jasa terhebat kami ❤️">✨ Pahlawan Kami</button>
+          <button class="wish-capsule-btn" data-msg="Keringat & lelah Abi adalah surga bagi kami 🤲">🌟 Teladan Abadi</button>
+          <button class="wish-capsule-btn" data-msg="Semoga Allah selalu menjaga senyum & kesehatan Abi 🤍">🌸 Doa Tulus</button>
+        </div>
+
+        <!-- NAVIGASI LANGKAH -->
+        <nav class="stage-nav-bar">
+          <button class="stage-nav-btn btn-prev" data-target="stage-letter">
+            ❮ Surat
+          </button>
+          <button class="stage-nav-btn btn-next pulse-glow" data-target="stage-memories">
+            Buka Galeri Kenangan 📸 ❯
+          </button>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LANGKAH 4: GALERI KENANGAN INDAH (POLAROID & FAIRY LIGHTS)
+       ============================================================ -->
+  <section id="stage-memories" class="stage" aria-label="Galeri Kenangan Indah Bersama Abi">
+    <div class="stage-inner gallery-stage-layout">
+      <!-- Ornamen Tali Lampu Fairy Lights Gantung -->
+      <div class="fairy-lights-garland" aria-hidden="true">
+        <span class="bulb b1">💡</span>
+        <span class="wire"></span>
+        <span class="bulb b2">✨</span>
+        <span class="wire"></span>
+        <span class="bulb b3">💡</span>
+        <span class="wire"></span>
+        <span class="bulb b4">✨</span>
+        <span class="wire"></span>
+        <span class="bulb b5">💡</span>
+      </div>
+
+      <header class="section-stage-header">
+        <div class="stage-icon-pill">📷</div>
+        <h2 class="stage-section-title">Kenangan Indah Bersama Abi</h2>
+        <p class="stage-section-subtitle">Ketuk ❤️ untuk kirim cinta, geser kartu, atau sentuh foto untuk memperbesar</p>
+
+        <!-- Bar Filter Efek Foto Polaroid -->
+        <div class="photo-filters" id="photo-filters">
+          <button class="filter-pill active" data-filter="normal">Asli 🖼️</button>
+          <button class="filter-pill" data-filter="warm">Hangat 🌅</button>
+          <button class="filter-pill" data-filter="vintage">Vintage 🎞️</button>
+        </div>
+      </header>
+
+      <div class="polaroid-gallery-wrapper">
+        <div class="polaroid-carousel" id="polaroid-carousel" tabindex="0" aria-label="Daftar foto polaroid kenangan">
+          <!-- Diisi secara dinamis oleh JavaScript -->
+        </div>
+
+        <!-- Tombol Navigasi Carousel -->
+        <div class="carousel-nav-controls">
+          <button id="prev-photo-btn" class="carousel-arrow-btn" aria-label="Foto sebelumnya">❮</button>
+          <div class="carousel-dots-indicator" id="carousel-dots" aria-hidden="true"></div>
+          <button id="next-photo-btn" class="carousel-arrow-btn" aria-label="Foto berikutnya">❯</button>
+        </div>
+      </div>
+
+      <!-- NAVIGASI LANGKAH -->
+      <nav class="stage-nav-bar">
+        <button class="stage-nav-btn btn-prev" data-target="stage-milestone">
+          ❮ Usia Emas
+        </button>
+        <button class="stage-nav-btn btn-next pulse-glow" data-target="stage-prayers">
+          Lanjut ke Untaian Doa 🤲 ❯
+        </button>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LANGKAH 5: TAMAN UNTAIAN DOA (6 KARTU 3D FLIP & AAMIIN)
+       ============================================================ -->
+  <section id="stage-prayers" class="stage" aria-label="Untaian Doa untuk Abi">
+    <div class="stage-inner prayers-stage-layout">
+      <header class="section-stage-header">
+        <div class="stage-icon-pill">🤲</div>
+        <h2 class="stage-section-title">Untaian Doa Tulus untuk Abi</h2>
+        <p class="stage-section-subtitle">Ketuk setiap kartu untuk membaca doa tulus dan tekan tombol Aamiin ✨</p>
+      </header>
+
+      <div class="prayers-grid" id="prayers-grid">
+        <!-- 6 Kartu Doa akan di-render di script.js -->
+      </div>
+
+      <div class="prayers-footer-actions">
+        <button id="flip-all-prayers-btn" class="secondary-btn-small">Buka Semua Doa Sekaligus 🌟</button>
+      </div>
+
+      <!-- NAVIGASI LANGKAH -->
+      <nav class="stage-nav-bar">
+        <button class="stage-nav-btn btn-prev" data-target="stage-memories">
+          ❮ Kenangan
+        </button>
+        <button class="stage-nav-btn btn-next pulse-glow" data-target="stage-cake">
+          Lanjut ke Pesta Lilin Kue 🎂 ❯
+        </button>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LANGKAH 6: PESTA KUE ULANG TAHUN & TIUP LILIN
+       ============================================================ -->
+  <section id="stage-cake" class="stage" aria-label="Kue Ulang Tahun & Tiup Lilin">
+    <div class="stage-inner cake-stage-layout">
+      <header class="section-stage-header">
+        <div class="stage-icon-pill">🎂</div>
+        <h2 class="stage-section-title">Tiup Lilin & Panjatkan Harapan</h2>
+        <p class="stage-section-subtitle">Ketuk lilin satu per satu, atau tiup ke lubang mikrofon HP Abi! 🌬️</p>
+      </header>
+
+      <div class="cake-stage-container">
+        <!-- Ilustrasi Kue Dua Tingkat + 5 Lilin -->
+        <div class="cake-assembly" id="cake-assembly" aria-label="Kue Ulang Tahun dengan 5 lilin">
+          <!-- Piring Kue Emas -->
+          <div class="cake-plate"></div>
+
+          <!-- Tingkat Bawah Kue -->
+          <div class="cake-tier cake-tier-bottom">
+            <div class="cake-frosting-stripes"></div>
+            <div class="cake-drips"></div>
+          </div>
+
+          <!-- Tingkat Atas Kue -->
+          <div class="cake-tier cake-tier-top">
+            <div class="cake-frosting-stripes"></div>
+            <div class="cake-drips"></div>
+            <div class="cake-berries">
+              <span class="berry">🍓</span>
+              <span class="berry">🍒</span>
+              <span class="berry">🍓</span>
+            </div>
+          </div>
+
+          <!-- Wadah 5 Lilin -->
+          <div class="candles-rack" id="candles-rack">
+            <!-- Lilin 1 -->
+            <div class="candle" data-candle="1" role="button" tabindex="0" aria-label="Lilin nomor 1, ketuk untuk memadamkan">
+              <div class="candle-flame">
+                <div class="flame-halo"></div>
+                <div class="flame-core"></div>
+              </div>
+              <div class="candle-smoke"></div>
+              <div class="candle-wick"></div>
+              <div class="candle-stick candle-stick-gold"></div>
+            </div>
+
+            <!-- Lilin 2 -->
+            <div class="candle" data-candle="2" role="button" tabindex="0" aria-label="Lilin nomor 2, ketuk untuk memadamkan">
+              <div class="candle-flame">
+                <div class="flame-halo"></div>
+                <div class="flame-core"></div>
+              </div>
+              <div class="candle-smoke"></div>
+              <div class="candle-wick"></div>
+              <div class="candle-stick candle-stick-cream"></div>
+            </div>
+
+            <!-- Lilin 3 (Tengah) -->
+            <div class="candle candle-center" data-candle="3" role="button" tabindex="0" aria-label="Lilin nomor 3, ketuk untuk memadamkan">
+              <div class="candle-flame">
+                <div class="flame-halo"></div>
+                <div class="flame-core"></div>
+              </div>
+              <div class="candle-smoke"></div>
+              <div class="candle-wick"></div>
+              <div class="candle-stick candle-stick-maroon"></div>
+            </div>
+
+            <!-- Lilin 4 -->
+            <div class="candle" data-candle="4" role="button" tabindex="0" aria-label="Lilin nomor 4, ketuk untuk memadamkan">
+              <div class="candle-flame">
+                <div class="flame-halo"></div>
+                <div class="flame-core"></div>
+              </div>
+              <div class="candle-smoke"></div>
+              <div class="candle-wick"></div>
+              <div class="candle-stick candle-stick-cream"></div>
+            </div>
+
+            <!-- Lilin 5 -->
+            <div class="candle" data-candle="5" role="button" tabindex="0" aria-label="Lilin nomor 5, ketuk untuk memadamkan">
+              <div class="candle-flame">
+                <div class="flame-halo"></div>
+                <div class="flame-core"></div>
+              </div>
+              <div class="candle-smoke"></div>
+              <div class="candle-wick"></div>
+              <div class="candle-stick candle-stick-gold"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Banner Kemenangan / Doa Terkabul (Muncul saat semua padam) -->
+        <div id="cake-wish-banner" class="cake-wish-banner hidden" aria-live="assertive">
+          <div class="wish-sparkles">✨ 🤲 ✨</div>
+          <p class="wish-text">Semoga semua doamu terkabul, Abi 🤲</p>
+          <p class="wish-subtext">Aamiin ya Rabbal 'Alamin</p>
+          <div class="wish-banner-actions">
+            <button id="release-lantern-btn" class="primary-gold-btn pulse-glow">
+              🏮 Terbangkan Lentera Doa ke Langit
+            </button>
+            <button id="relight-candles-btn" class="secondary-btn-small">Nyalakan Lilin Lagi 🕯️</button>
+          </div>
+        </div>
+
+        <!-- Kontrol Tiup Lilin -->
+        <div class="cake-controls" id="cake-controls">
+          <button id="blow-mic-btn" class="primary-gold-btn pulse-glow" aria-label="Tiup lilin dengan mikrofon atau sentuhan">
+            <span class="btn-icon">🌬️</span> Tiup lilin
+          </button>
+          <p id="mic-status-text" class="mic-status-hint">
+            Bisa langsung ditiup ke lubang mikrofon HP atau ketuk tombol di atas!
+          </p>
+        </div>
+      </div>
+
+      <!-- NAVIGASI LANGKAH -->
+      <nav class="stage-nav-bar">
+        <button class="stage-nav-btn btn-prev" data-target="stage-prayers">
+          ❮ Untaian Doa
+        </button>
+        <button class="stage-nav-btn btn-next pulse-glow" data-target="stage-gift">
+          Buka Kado Terakhir untuk Abi 🎁 ❯
+        </button>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LANGKAH 7: PUNCAK KADO SPESIAL & PESAN CINTA
+       ============================================================ -->
+  <section id="stage-gift" class="stage" aria-label="Kado Spesial untuk Abi">
+    <div class="stage-inner gift-stage-layout">
+      <div class="royal-spotlight" aria-hidden="true"></div>
+
+      <header class="section-stage-header">
+        <div class="stage-icon-pill">🎁</div>
+        <h2 class="stage-section-title">Kado Spesial untuk Abi</h2>
+        <p class="stage-section-subtitle">Sebuah ungkapan rasa syukur dan cinta terdalam dari kami</p>
+      </header>
+
+      <div class="gift-box-stage">
+        <!-- KOTAK KADO 3D INTERAKTIF -->
+        <div class="gift-interactive-box" id="gift-interactive-box" role="button" tabindex="0" aria-label="Ketuk kotak kado untuk membuka">
+          <!-- Tutup Kado -->
+          <div class="gift-lid" id="gift-lid">
+            <div class="gift-bow">
+              <div class="bow-loop bow-left"></div>
+              <div class="bow-loop bow-right"></div>
+              <div class="bow-center"></div>
+            </div>
+            <div class="gift-ribbon-horizontal"></div>
+          </div>
+
+          <!-- Badan Kado -->
+          <div class="gift-body">
+            <div class="gift-ribbon-vertical"></div>
+            <div class="gift-sparkle-stars" aria-hidden="true">✦ ✧ ✦</div>
+          </div>
+        </div>
+
+        <p id="gift-tap-hint" class="gift-tap-hint pulse">
+          Ketuk kotak kado untuk membuka 🎁
+        </p>
+
+        <!-- PESAN RAHASIA DI DALAM KADO (TERBUKA SETELAH DIKETUK) -->
+        <div id="gift-secret-message" class="gift-secret-card hidden" aria-live="polite">
+          <div class="card-flourish">❦</div>
+          <p class="gift-revealed-text">
+            "Terima kasih sudah menjadi Abi terbaik di dunia."
+          </p>
+          <p class="gift-revealed-sub">
+            Dengan cinta dan doa yang tak pernah putus,
+          </p>
+          <h3 class="gift-signature" id="gift-author-name">Anakmu</h3>
+
+          <div class="gift-action-buttons">
+            <button id="open-letter-modal-btn" class="secondary-btn" aria-label="Baca kembali surat cinta lengkap">
+              💌 Baca Surat Lengkap Kembali
+            </button>
+            <button id="share-wa-btn" class="primary-gold-btn pulse-glow" aria-label="Bagikan ke WhatsApp">
+              📲 Kirim Ucapan ke WhatsApp
+            </button>
+            <button id="restart-flow-btn" class="secondary-btn" aria-label="Ulangi dari awal">
+              Ulangi Perjalanan dari Awal 🔄
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAVIGASI LANGKAH -->
+      <nav class="stage-nav-bar">
+        <button class="stage-nav-btn btn-prev" data-target="stage-cake">
+          ❮ Pesta Lilin
+        </button>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MODAL: BACA SURAT LENGKAP KEMBALI
+       ============================================================ -->
+  <div id="letter-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="letter-again-title">
+    <div class="modal-dialog">
+      <button id="close-letter-modal-btn" class="close-modal-btn" aria-label="Tutup surat">✕</button>
+      <article class="parchment-letter letter-full-view">
+        <div class="letter-header-decor">
+          <div class="wax-stamp-mini">A</div>
+          <div class="letter-date" id="letter-again-date">18 November 1969 — 18 November 2026</div>
+        </div>
+
+        <h3 class="letter-title" id="letter-again-title">Selamat Ulang Tahun, Abi 🎉</h3>
+        <div class="letter-divider">
+          <span>❦</span>
+        </div>
+
+        <div class="letter-body">
+          <p class="letter-paragraph" id="letter-again-p1"></p>
+          <p class="letter-paragraph" id="letter-again-p2"></p>
+        </div>
+
+        <div class="letter-footer-sign">
+          <span class="sign-note">Selalu mencintai Abi,</span>
+          <span class="sign-name" id="letter-again-signature">Anakmu tercinta</span>
+        </div>
+      </article>
     </div>
   </div>
 
   <!-- ============================================================
-       LIGHTBOX UNTUK FOTO POLAROID
+       MODAL: LIGHTBOX UNTUK FOTO POLAROID
        ============================================================ -->
   <div id="photo-lightbox" class="photo-lightbox hidden" role="dialog" aria-modal="true" aria-label="Lihat Foto Kenangan">
     <div class="lightbox-overlay" id="lightbox-overlay"></div>
@@ -506,6 +524,9 @@
       </div>
     </div>
   </div>
+
+  <!-- TOAST GLOBAL -->
+  <div id="global-toast" class="mobile-toast" aria-live="polite"></div>
 
   <!-- SCRIPT UTAMA -->
   <script src="script.js"></script>

@@ -281,74 +281,12 @@ class SoundEngine {
       osc.stop(now + 0.05);
     } catch (e) {}
   }
-
-  // Suara hati / love pop
-  playHeartPop() {
-    if (this.isMuted || !this.ctx) return;
-    try {
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(420, now);
-      osc.frequency.exponentialRampToValueAtTime(880, now + 0.09);
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.11);
-    } catch (e) {}
-  }
-
-  // Suara aamiin doa yang syahdu (arpeggio lembut)
-  playAmenChime() {
-    if (this.isMuted || !this.ctx) return;
-    const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
-    notes.forEach((freq, idx) => {
-      setTimeout(() => {
-        try {
-          if (!this.ctx) return;
-          const now = this.ctx.currentTime;
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, now);
-          gain.gain.setValueAtTime(0.14, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(now);
-          osc.stop(now + 0.65);
-        } catch (e) {}
-      }, idx * 80);
-    });
-  }
-
-  // Suara terbangkan lentera harapan
-  playLanternChime() {
-    if (this.isMuted || !this.ctx) return;
-    try {
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(320, now);
-      osc.frequency.exponentialRampToValueAtTime(960, now + 1.2);
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 1.35);
-    } catch (e) {}
-  }
 }
 
 const sounds = new SoundEngine();
 
 /* ===================================================================
-   CANVAS AMBIENT: BINTANG, BINTANG JATUH, STARDUST TRAIL, HATI, & BALON
+   CANVAS AMBIENT: BINTANG, HATI, & BALON MELAYANG DI LATAR BELAKANG
    =================================================================== */
 class AmbientBackground {
   constructor(canvas) {
@@ -356,18 +294,14 @@ class AmbientBackground {
     this.ctx = canvas.getContext('2d');
     this.stars = [];
     this.particles = []; // Hati & balon
-    this.shootingStars = []; // Bintang jatuh / meteor
-    this.touchSparks = []; // Jejak sentuhan stardust
     this.width = 0;
     this.height = 0;
     this.animId = null;
-    this.lastShootingStar = performance.now();
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     this.resize();
     window.addEventListener('resize', () => this.resize());
     this.initElements();
-    this.setupTouchTrail();
     this.loop();
   }
 
@@ -382,7 +316,7 @@ class AmbientBackground {
 
   initElements() {
     // Buat bintang berkelap-kelip
-    const starCount = Math.min(Math.floor((this.width * this.height) / 12000), 75);
+    const starCount = Math.min(Math.floor((this.width * this.height) / 12000), 70);
     this.stars = [];
     for (let i = 0; i < starCount; i++) {
       this.stars.push({
@@ -396,61 +330,16 @@ class AmbientBackground {
     }
 
     // Buat balon & hati melayang pelan
-    const particleCount = this.reducedMotion ? 4 : 12;
+    const particleCount = this.reducedMotion ? 4 : 14;
     this.particles = [];
     for (let i = 0; i < particleCount; i++) {
       this.particles.push(this.createParticle(true));
     }
   }
 
-  setupTouchTrail() {
-    if (this.reducedMotion) return;
-    const addSpark = (clientX, clientY) => {
-      for (let i = 0; i < 2; i++) {
-        this.touchSparks.push({
-          x: clientX + (Math.random() - 0.5) * 14,
-          y: clientY + (Math.random() - 0.5) * 14,
-          vx: (Math.random() - 0.5) * 1.2,
-          vy: Math.random() * -1.2 - 0.3,
-          size: Math.random() * 2 + 1,
-          alpha: 1,
-          decay: Math.random() * 0.025 + 0.02,
-          color: Math.random() > 0.35 ? '#ffd778' : '#ffffff'
-        });
-      }
-    };
-
-    window.addEventListener('pointermove', (e) => {
-      addSpark(e.clientX, e.clientY);
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-      if (e.touches && e.touches[0]) {
-        addSpark(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    }, { passive: true });
-  }
-
-  spawnShootingStar() {
-    if (this.reducedMotion) return;
-    const startX = Math.random() * this.width * 0.8;
-    const startY = Math.random() * this.height * 0.35;
-    const length = Math.random() * 80 + 70;
-    const speed = Math.random() * 8 + 9;
-    const angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.25;
-    this.shootingStars.push({
-      x: startX,
-      y: startY,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      length: length,
-      alpha: 1,
-      decay: 0.016
-    });
-  }
-
   createParticle(randomY = false) {
     const isBalloon = Math.random() > 0.45;
+    // Warna lembut & hangat agar tidak menutupi teks saat melayang
     const colors = ['#f7d78a', '#f6ecd6', '#eed7a1', '#e5b0b7', '#d9b25f'];
     return {
       type: isBalloon ? 'balloon' : 'heart',
@@ -462,14 +351,14 @@ class AmbientBackground {
       swayDist: Math.random() * 20 + 12,
       phase: Math.random() * Math.PI * 2,
       color: colors[Math.floor(Math.random() * colors.length)],
-      alpha: Math.random() * 0.12 + 0.08
+      alpha: Math.random() * 0.12 + 0.08 // Transparan halus di latar belakang
     };
   }
 
   loop() {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
-    // 1. Gambar Bintang Berkelap-kelip
+    // 1. Gambar Bintang
     for (let s of this.stars) {
       s.phase += s.speed;
       const currentAlpha = s.alpha * (0.6 + 0.4 * Math.sin(s.phase));
@@ -479,64 +368,7 @@ class AmbientBackground {
       this.ctx.fill();
     }
 
-    // 2. Spawn & Gambar Bintang Jatuh (Meteor)
-    const now = performance.now();
-    if (now - this.lastShootingStar > 6000 && Math.random() > 0.7) {
-      this.spawnShootingStar();
-      this.lastShootingStar = now;
-    }
-
-    for (let i = this.shootingStars.length - 1; i >= 0; i--) {
-      const star = this.shootingStars[i];
-      star.x += star.vx;
-      star.y += star.vy;
-      star.alpha -= star.decay;
-
-      if (star.alpha <= 0) {
-        this.shootingStars.splice(i, 1);
-        continue;
-      }
-
-      this.ctx.save();
-      this.ctx.globalAlpha = star.alpha;
-      const grad = this.ctx.createLinearGradient(
-        star.x, star.y,
-        star.x - star.vx * 3.5, star.y - star.vy * 3.5
-      );
-      grad.addColorStop(0, '#ffffff');
-      grad.addColorStop(0.3, '#ffd778');
-      grad.addColorStop(1, 'transparent');
-      this.ctx.strokeStyle = grad;
-      this.ctx.lineWidth = 1.8;
-      this.ctx.beginPath();
-      this.ctx.moveTo(star.x, star.y);
-      this.ctx.lineTo(star.x - star.vx * 3.5, star.y - star.vy * 3.5);
-      this.ctx.stroke();
-      this.ctx.restore();
-    }
-
-    // 3. Gambar Jejak Sentuhan Stardust (Touch Sparks)
-    for (let i = this.touchSparks.length - 1; i >= 0; i--) {
-      const sp = this.touchSparks[i];
-      sp.x += sp.vx;
-      sp.y += sp.vy;
-      sp.alpha -= sp.decay;
-      if (sp.alpha <= 0) {
-        this.touchSparks.splice(i, 1);
-        continue;
-      }
-      this.ctx.save();
-      this.ctx.globalAlpha = sp.alpha;
-      this.ctx.fillStyle = sp.color;
-      this.ctx.shadowBlur = 6;
-      this.ctx.shadowColor = sp.color;
-      this.ctx.beginPath();
-      this.ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
-      this.ctx.fill();
-      this.ctx.restore();
-    }
-
-    // 4. Gambar Balon & Hati Melayang
+    // 2. Gambar Balon & Hati Melayang
     for (let i = 0; i < this.particles.length; i++) {
       let p = this.particles[i];
       p.y -= p.speedY;
@@ -547,11 +379,13 @@ class AmbientBackground {
       this.ctx.globalAlpha = p.alpha;
 
       if (p.type === 'balloon') {
+        // Balon lonjong
         this.ctx.beginPath();
         this.ctx.ellipse(drawX, p.y, p.size * 0.75, p.size, 0, 0, Math.PI * 2);
         this.ctx.fillStyle = p.color;
         this.ctx.fill();
 
+        // Tali balon halus meliuk
         this.ctx.beginPath();
         this.ctx.moveTo(drawX, p.y + p.size);
         this.ctx.quadraticCurveTo(drawX + Math.sin(p.phase) * 6, p.y + p.size + 15, drawX, p.y + p.size + 30);
@@ -559,11 +393,13 @@ class AmbientBackground {
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
       } else {
+        // Hati melayang
         this.drawHeart(drawX, p.y, p.size, p.color);
       }
 
       this.ctx.restore();
 
+      // Reset jika sudah lewat atas layar
       if (p.y < -50) {
         this.particles[i] = this.createParticle(false);
       }
@@ -772,7 +608,7 @@ class MusicManager {
 }
 
 /* ===================================================================
-   APLIKASI UTAMA (ORCHESTRATOR)
+   APLIKASI UTAMA (STORY JOURNEY BERTAPAHAP: BAB DEMI BAB)
    =================================================================== */
 class BirthdayApp {
   constructor() {
@@ -780,18 +616,24 @@ class BirthdayApp {
     this.fx = null;
     this.music = null;
 
-    // State Tracking
-    this.visitedPanels = new Set();
-    this.isGiftUnlocked = false;
-    this.currentActivePanel = null;
+    // Alur Cerita Bertahap (Sequential Story Stages)
+    this.storyStages = [
+      { id: 'stage-envelope', badge: '', progress: 0 },
+      { id: 'stage-letter', badge: '', progress: 0 },
+      { id: 'stage-milestone', badge: 'Bab 1/5: Usia Emas ✨', progress: 20 },
+      { id: 'stage-memories', badge: 'Bab 2/5: Kenangan Indah 📸', progress: 40 },
+      { id: 'stage-prayers', badge: 'Bab 3/5: Untaian Doa 🤲', progress: 60 },
+      { id: 'stage-cake', badge: 'Bab 4/5: Tiup Lilin 🎂', progress: 80 },
+      { id: 'stage-gift', badge: 'Bab 5/5: Kado Spesial 🎁', progress: 100 }
+    ];
+    this.currentStageId = 'stage-envelope';
+
     this.isTyping = false;
     this.typewriterTimeouts = [];
 
     // DOM Elements Cache
     this.stageEnvelope = document.getElementById('stage-envelope');
     this.stageLetter = document.getElementById('stage-letter');
-    this.stageMain = document.getElementById('stage-main');
-
     this.envelope = document.getElementById('envelope');
     this.waxSeal = document.getElementById('wax-seal');
 
@@ -805,18 +647,6 @@ class BirthdayApp {
     this.countupAge = document.getElementById('countup-age');
     this.totalDaysCount = document.getElementById('total-days-count');
     this.heroAbiName = document.getElementById('hero-abi-name');
-
-    this.sideDock = document.getElementById('side-dock');
-    this.dockButtons = document.querySelectorAll('.dock-btn');
-    this.giftBtn = document.getElementById('dock-btn-gift');
-    this.giftIcon = document.getElementById('gift-btn-icon');
-    this.giftLockBadge = document.getElementById('gift-lock-badge');
-    this.giftTooltipText = document.getElementById('gift-tooltip-text');
-
-    this.panelBackdrop = document.getElementById('modal-panel-backdrop');
-    this.panelCard = document.getElementById('panel-card');
-    this.closePanelBtn = document.getElementById('close-panel-btn');
-    this.mobileToast = document.getElementById('mobile-dock-toast');
 
     this.init();
   }
@@ -856,13 +686,14 @@ class BirthdayApp {
     const giftAuthorName = document.getElementById('gift-author-name');
     if (giftAuthorName) giftAuthorName.textContent = CONFIG.NAMA;
 
-    // 4. Hitung Hari Otomatis
+    // 4. Hitung Hari & Jam Otomatis
     this.calculateLifeStats();
 
-    // 5. Setup Event Listeners
+    // 5. Setup Semua Langkah Interaktif
     this.setupEnvelopeStage();
     this.setupLetterStage();
-    this.setupMainRoomAndDock();
+    this.setupStageNavigation();
+    this.setupMilestoneStage();
     this.setupPanelMemories();
     this.setupPanelPrayers();
     this.setupPanelCake();
@@ -871,7 +702,75 @@ class BirthdayApp {
   }
 
   /* -------------------------------------------------------------
-     TAHAP 1: AMPLOP PEMBUKA
+     NAVIGASI UTAMA ANTAR-LANGKAH (STAGE SWITCHER)
+     ------------------------------------------------------------- */
+  goToStage(targetStageId) {
+    sounds.playClick();
+    const currentElem = document.getElementById(this.currentStageId);
+    const targetElem = document.getElementById(targetStageId);
+
+    if (!targetElem) return;
+
+    if (currentElem) {
+      currentElem.classList.remove('active');
+    }
+    targetElem.classList.add('active');
+    this.currentStageId = targetStageId;
+    targetElem.scrollTop = 0;
+
+    // Update Step Progress Bar & Badge
+    const stageInfo = this.storyStages.find(s => s.id === targetStageId);
+    const progressWrapper = document.getElementById('story-progress-wrapper');
+    const badgeElem = document.getElementById('story-step-badge');
+    const fillElem = document.getElementById('story-progress-fill');
+
+    if (stageInfo && stageInfo.badge) {
+      if (progressWrapper) progressWrapper.classList.remove('hidden');
+      if (badgeElem) badgeElem.textContent = stageInfo.badge;
+      if (fillElem) fillElem.style.width = `${stageInfo.progress}%`;
+    } else {
+      if (progressWrapper) progressWrapper.classList.add('hidden');
+    }
+
+    // Efek Kejutan Masuk Tahap
+    if (targetStageId === 'stage-milestone') {
+      this.startCountUp();
+      if (this.fx) this.fx.burstConfetti(40);
+    } else if (targetStageId === 'stage-memories') {
+      if (this.fx) this.fx.burstConfetti(30);
+    } else if (targetStageId === 'stage-prayers') {
+      if (this.fx) this.fx.burstFirework(window.innerWidth * 0.5, window.innerHeight * 0.3, ['#ffd778', '#f6ecd6', '#ffffff']);
+    } else if (targetStageId === 'stage-gift') {
+      if (this.fx) {
+        this.fx.burstFirework(window.innerWidth * 0.5, window.innerHeight * 0.3, ['#ffd778', '#ff4d4d', '#ffffff']);
+      }
+    }
+  }
+
+  setupStageNavigation() {
+    document.querySelectorAll('.stage-nav-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = btn.getAttribute('data-target');
+        if (target) {
+          this.goToStage(target);
+        }
+      });
+    });
+  }
+
+  showToast(text) {
+    const toast = document.getElementById('global-toast');
+    if (!toast) return;
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(this.toastTimeout);
+    this.toastTimeout = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2000);
+  }
+
+  /* -------------------------------------------------------------
+     LANGKAH 1: AMPLOP PEMBUKA & SEGEL LILIN
      ------------------------------------------------------------- */
   setupEnvelopeStage() {
     const openEnvelope = () => {
@@ -882,7 +781,7 @@ class BirthdayApp {
 
       this.envelope.classList.add('is-opening');
 
-      // TAHAP 2: Efek Petasan & Kembang Api
+      // Tembakkan kembang api pembuka & petasan
       setTimeout(() => {
         sounds.playFirecrackerBurst(7);
         if (this.fx) {
@@ -891,9 +790,9 @@ class BirthdayApp {
         }
       }, 350);
 
-      // Transisi ke TAHAP 3: Surat Mengetik
+      // Transisi otomatis ke LANGKAH 2: Surat Mengetik
       setTimeout(() => {
-        this.switchStage(this.stageEnvelope, this.stageLetter);
+        this.goToStage('stage-letter');
         this.startTypewriterLetter();
       }, 1600);
     };
@@ -908,7 +807,7 @@ class BirthdayApp {
   }
 
   /* -------------------------------------------------------------
-     TAHAP 3: SURAT VINTAGE DENGAN EFEK MENGETIK
+     LANGKAH 2: SURAT VINTAGE DENGAN EFEK MENGETIK
      ------------------------------------------------------------- */
   setupLetterStage() {
     this.skipTypingBtn.addEventListener('click', () => {
@@ -918,11 +817,7 @@ class BirthdayApp {
 
     this.letterNextBtn.addEventListener('click', () => {
       sounds.playClick();
-      this.switchStage(this.stageLetter, this.stageMain);
-      this.startCountUp();
-      if (this.fx) {
-        this.fx.burstConfetti(50);
-      }
+      this.goToStage('stage-milestone');
     });
   }
 
@@ -1001,7 +896,7 @@ class BirthdayApp {
   }
 
   /* -------------------------------------------------------------
-     TAHAP 4: RUANG UTAMA & DOCK SISI LAYAR
+     LANGKAH 3: RUANG USIA EMAS & PENGHORMATAN ABI
      ------------------------------------------------------------- */
   calculateLifeStats() {
     const birth = new Date(CONFIG.BIRTH_DATE);
@@ -1009,7 +904,6 @@ class BirthdayApp {
     const diffTime = Math.abs(now - birth);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    // Format dengan pemisah titik ribuan (misal: 20.817)
     const formattedDays = diffDays.toLocaleString('id-ID');
     if (this.totalDaysCount) {
       this.totalDaysCount.textContent = formattedDays;
@@ -1030,7 +924,6 @@ class BirthdayApp {
     const frame = (now) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-      // Easing out quadratic
       const ease = 1 - Math.pow(1 - progress, 3);
       const current = Math.floor(ease * targetAge);
       if (this.countupAge) this.countupAge.textContent = current;
@@ -1044,46 +937,14 @@ class BirthdayApp {
     requestAnimationFrame(frame);
   }
 
-  setupMainRoomAndDock() {
-    this.dockButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        sounds.playClick();
-        const panelId = btn.getAttribute('data-panel');
-        if (btn.classList.contains('dock-btn-locked')) {
-          this.showMobileToast("Kado masih terkunci! Buka Kenangan, Doa, & Kue dulu ya Abi 🎁");
-          return;
-        }
-
-        // Tampilkan toast singkat pada layar HP saat ditekan
-        const tooltip = btn.querySelector('.dock-tooltip');
-        if (tooltip) {
-          this.showMobileToast(tooltip.textContent);
-        }
-
-        this.openPanel(panelId, btn);
-      });
-    });
-
-    // Tutup panel
-    this.closePanelBtn.addEventListener('click', () => {
-      sounds.playClick();
-      this.closePanel();
-    });
-
-    this.panelBackdrop.addEventListener('click', (e) => {
-      if (e.target === this.panelBackdrop) {
-        sounds.playClick();
-        this.closePanel();
-      }
-    });
-
-    // Wish Capsules Interaktif di Ruang Utama
+  setupMilestoneStage() {
+    // Wish Capsules Interaktif di Ruang Usia Emas
     const wishButtons = document.querySelectorAll('.wish-capsule-btn');
     wishButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         sounds.playHeartPop();
         const msg = btn.getAttribute('data-msg');
-        this.showMobileToast(msg);
+        this.showToast(msg);
         if (this.fx) {
           const rect = btn.getBoundingClientRect();
           this.fx.burstFirework(rect.left + rect.width / 2, rect.top + rect.height / 2, ['#ffd778', '#ffffff', '#e098a0']);
@@ -1091,7 +952,7 @@ class BirthdayApp {
       });
     });
 
-    // 3D Tilt halus pada kartu usia saat digerakkan
+    // 3D Parallax Tilt halus pada kartu usia
     const ageCard = document.getElementById('hero-age-card');
     if (ageCard) {
       ageCard.addEventListener('pointermove', (e) => {
@@ -1106,90 +967,8 @@ class BirthdayApp {
     }
   }
 
-  showMobileToast(text) {
-    if (!this.mobileToast) return;
-    this.mobileToast.textContent = text;
-    this.mobileToast.classList.add('show');
-    clearTimeout(this.toastTimeout);
-    this.toastTimeout = setTimeout(() => {
-      this.mobileToast.classList.remove('show');
-    }, 1800);
-  }
-
-  openPanel(panelId, triggeredBtn) {
-    // Sembunyikan panel-panel sebelumnya
-    const allPanels = document.querySelectorAll('.panel-content');
-    allPanels.forEach(p => p.classList.add('hidden'));
-
-    // Tampilkan panel target
-    const targetPanel = document.getElementById(panelId);
-    if (targetPanel) {
-      targetPanel.classList.remove('hidden');
-    }
-
-    // Aktifkan backdrop & modal
-    this.panelBackdrop.classList.add('active');
-    this.currentActivePanel = panelId;
-
-    // Update state tombol dock
-    this.dockButtons.forEach(b => b.classList.remove('is-active'));
-    if (triggeredBtn) {
-      triggeredBtn.classList.add('is-active');
-      this.markPanelVisited(triggeredBtn, panelId);
-    }
-  }
-
-  closePanel() {
-    this.panelBackdrop.classList.remove('active');
-    this.dockButtons.forEach(b => b.classList.remove('is-active'));
-    this.currentActivePanel = null;
-  }
-
-  markPanelVisited(btn, panelId) {
-    // Hilangkan badge 'Baru' & animasi pulse
-    btn.classList.remove('pulse', 'has-badge');
-    const newBadge = btn.querySelector('.new-badge');
-    if (newBadge) newBadge.classList.add('hidden');
-
-    // Tampilkan centang (✓)
-    const checkBadge = btn.querySelector('.check-badge');
-    if (checkBadge) checkBadge.classList.remove('hidden');
-
-    this.visitedPanels.add(panelId);
-
-    // Cek jika 3 tombol awal (Kenangan, Doa, Kue) sudah dibuka
-    if (!this.isGiftUnlocked) {
-      const required = ['panel-memories', 'panel-prayers', 'panel-cake'];
-      const allDone = required.every(p => this.visitedPanels.has(p));
-      if (allDone) {
-        this.unlockGiftButton();
-      }
-    }
-  }
-
-  unlockGiftButton() {
-    this.isGiftUnlocked = true;
-    this.giftBtn.removeAttribute('disabled');
-    this.giftBtn.setAttribute('aria-disabled', 'false');
-    this.giftBtn.setAttribute('aria-label', 'Buka Hadiah Spesial untuk Abi');
-    this.giftBtn.classList.remove('dock-btn-locked');
-    this.giftBtn.classList.add('unlocking');
-
-    if (this.giftIcon) this.giftIcon.textContent = '🎁';
-    if (this.giftLockBadge) this.giftLockBadge.classList.add('hidden');
-    if (this.giftTooltipText) this.giftTooltipText.textContent = 'Buka Hadiah Spesial ✨';
-
-    sounds.playCelebrationChime();
-    if (this.fx) {
-      this.fx.burstConfetti(60);
-      this.fx.burstFirework(window.innerWidth * 0.8, window.innerHeight * 0.5);
-    }
-
-    this.showMobileToast("🎉 Kado spesial untuk Abi sudah terbuka!");
-  }
-
   /* -------------------------------------------------------------
-     PANEL 1: KENANGAN (POLAROID CAROUSEL & SWIPE)
+     LANGKAH 4: GALERI KENANGAN INDAH (POLAROID & FAIRY LIGHTS)
      ------------------------------------------------------------- */
   setupPanelMemories() {
     const carousel = document.getElementById('polaroid-carousel');
@@ -1199,7 +978,6 @@ class BirthdayApp {
 
     if (!carousel) return;
 
-    // Render daftar polaroid dari CONFIG.PHOTOS (atau placeholder jika kosong)
     carousel.innerHTML = '';
     dotsContainer.innerHTML = '';
 
@@ -1212,7 +990,6 @@ class BirthdayApp {
     ];
 
     const photosToRender = (CONFIG.PHOTOS && CONFIG.PHOTOS.length > 0) ? CONFIG.PHOTOS : defaultPlaceholders;
-
     const rotations = [-2.5, 1.8, -1.2, 2.2, -1.5];
 
     photosToRender.forEach((photo, index) => {
@@ -1224,7 +1001,6 @@ class BirthdayApp {
       card.setAttribute('role', 'button');
       card.setAttribute('aria-label', `Foto kenangan: ${photo.cap}`);
 
-      // Gambar dengan fallback jika belum ada
       const imgWrap = document.createElement('div');
       imgWrap.className = 'polaroid-img-wrapper';
 
@@ -1233,7 +1009,6 @@ class BirthdayApp {
       img.alt = photo.cap;
       img.loading = 'lazy';
 
-      // Fallback placeholder jika file gambar tidak ditemukan
       img.onerror = () => {
         img.remove();
         const placeholder = document.createElement('div');
@@ -1267,6 +1042,7 @@ class BirthdayApp {
         loveBtn.querySelector('.love-num').textContent = loveCount;
         loveBtn.style.transform = 'scale(1.28)';
         setTimeout(() => loveBtn.style.transform = '', 200);
+        this.showToast(`Cinta untuk foto "${photo.cap}" terkirim! ❤️`);
         if (this.fx) {
           const rect = loveBtn.getBoundingClientRect();
           this.fx.burstFirework(rect.left + rect.width / 2, rect.top, ['#ff4d4d', '#ffd778', '#ffffff']);
@@ -1307,7 +1083,7 @@ class BirthdayApp {
       });
     }, { passive: true });
 
-    // Tombol Navigasi Next / Prev
+    // Tombol Navigasi Next / Prev Carousel
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
         sounds.playClick();
@@ -1376,7 +1152,7 @@ class BirthdayApp {
   }
 
   /* -------------------------------------------------------------
-     PANEL 2: DOA (6 KARTU 3D FLIP)
+     LANGKAH 5: TAMAN UNTAIAN DOA (6 KARTU 3D FLIP & AAMIIN)
      ------------------------------------------------------------- */
   setupPanelPrayers() {
     const grid = document.getElementById('prayers-grid');
@@ -1415,7 +1191,7 @@ class BirthdayApp {
         sounds.playAmenChime();
         amenCount++;
         amenBtn.querySelector('.amen-num').textContent = amenCount;
-        this.showMobileToast(`Aamiin ya Rabbal 'Alamin 🤲 (+${amenCount})`);
+        this.showToast(`Aamiin ya Rabbal 'Alamin 🤲 (+${amenCount})`);
         if (this.fx) {
           const rect = amenBtn.getBoundingClientRect();
           this.fx.burstFirework(rect.left + rect.width / 2, rect.top, ['#ffd778', '#f6ecd6', '#ffffff']);
@@ -1457,7 +1233,7 @@ class BirthdayApp {
   }
 
   /* -------------------------------------------------------------
-     PANEL 3: KUE ULANG TAHUN & TIUP LILIN
+     LANGKAH 6: PESTA KUE ULANG TAHUN & TIUP LILIN
      ------------------------------------------------------------- */
   setupPanelCake() {
     const candles = document.querySelectorAll('.candle');
@@ -1498,7 +1274,7 @@ class BirthdayApp {
       releaseLanternBtn.addEventListener('click', () => {
         sounds.playLanternChime();
         this.launchSkyLantern();
-        this.showMobileToast("Lentera doa & harapan melayang tinggi ke angkasa... 🏮✨");
+        this.showToast("Lentera doa & harapan melayang tinggi ke angkasa... 🏮✨");
         if (this.fx) {
           this.fx.burstConfetti(60);
         }
@@ -1544,7 +1320,6 @@ class BirthdayApp {
     let fallbackTimeout = null;
     let isFinished = false;
 
-    // Fallback: jika mic ditolak atau tidak ada tiupan dalam 7 detik, tiup lilin otomatis satu per satu
     fallbackTimeout = setTimeout(() => {
       if (!isFinished) {
         cleanup();
@@ -1564,7 +1339,6 @@ class BirthdayApp {
       }
     };
 
-    // Minta izin mikrofon
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
@@ -1583,14 +1357,12 @@ class BirthdayApp {
             if (isFinished) return;
             analyser.getByteFrequencyData(dataArray);
 
-            // Hitung rata-rata volume suara tiupan (biasanya frekuensi rendah-menengah bergejolak)
             let sum = 0;
             for (let i = 0; i < 20; i++) {
               sum += dataArray[i];
             }
             const average = sum / 20;
 
-            // Ambang batas tiupan nafas
             if (average > 65) {
               cleanup();
               if (statusElem) statusElem.textContent = "Hembusan nafas Abi terdeteksi! Lilin padam... 🌬️";
@@ -1604,7 +1376,6 @@ class BirthdayApp {
           checkBlowVolume();
         })
         .catch(err => {
-          console.log("Akses mikrofon tidak diizinkan atau tidak didukung:", err);
           cleanup();
           this.autoBlowAllCandles();
         });
@@ -1646,13 +1417,16 @@ class BirthdayApp {
   }
 
   /* -------------------------------------------------------------
-     PANEL 4: HADIAH PENUTUP (KOTAK KADO & PESAN SPESIAL)
+     LANGKAH 7: PUNCAK KADO SPESIAL & PESAN CINTA
      ------------------------------------------------------------- */
   setupPanelGift() {
     const giftBox = document.getElementById('gift-interactive-box');
     const secretMsg = document.getElementById('gift-secret-message');
     const hint = document.getElementById('gift-tap-hint');
     const restartBtn = document.getElementById('restart-flow-btn');
+    const openLetterModalBtn = document.getElementById('open-letter-modal-btn');
+    const closeLetterModalBtn = document.getElementById('close-letter-modal-btn');
+    const letterModal = document.getElementById('letter-modal');
 
     if (giftBox) {
       const openGift = () => {
@@ -1678,15 +1452,29 @@ class BirthdayApp {
       });
     }
 
-    if (restartBtn) {
-      restartBtn.addEventListener('click', () => {
+    // Modal Baca Surat Lengkap Kembali
+    if (openLetterModalBtn && letterModal) {
+      openLetterModalBtn.addEventListener('click', () => {
         sounds.playClick();
-        if (confirm("Ulangi perjalanan perayaan dari awal?")) {
-          window.location.reload();
+        letterModal.classList.remove('hidden');
+      });
+    }
+    if (closeLetterModalBtn && letterModal) {
+      closeLetterModalBtn.addEventListener('click', () => {
+        sounds.playClick();
+        letterModal.classList.add('hidden');
+      });
+    }
+    if (letterModal) {
+      letterModal.addEventListener('click', (e) => {
+        if (e.target === letterModal) {
+          sounds.playClick();
+          letterModal.classList.add('hidden');
         }
       });
     }
 
+    // Tombol Bagikan ke WhatsApp
     const shareWaBtn = document.getElementById('share-wa-btn');
     if (shareWaBtn) {
       shareWaBtn.addEventListener('click', () => {
@@ -1697,22 +1485,22 @@ class BirthdayApp {
         window.open(waUrl, '_blank');
       });
     }
+
+    // Ulangi Perjalanan dari Awal
+    if (restartBtn) {
+      restartBtn.addEventListener('click', () => {
+        sounds.playClick();
+        if (confirm("Ulangi perjalanan perayaan hari bahagia Abi dari awal?")) {
+          window.location.reload();
+        }
+      });
+    }
   }
 
   /* -------------------------------------------------------------
-     GLOBAL HELPER: NAVIGASI & SHORTCUT KEYBOARD
+     GLOBAL SHORTCUT KEYBOARD & MODAL CLOSER
      ------------------------------------------------------------- */
-  switchStage(fromStage, toStage) {
-    if (fromStage) {
-      fromStage.classList.remove('active');
-    }
-    if (toStage) {
-      toStage.classList.add('active');
-    }
-  }
-
   setupGlobalShortcuts() {
-    // Tombol Escape menutup panel atau lightbox yang sedang terbuka
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         const lightbox = document.getElementById('photo-lightbox');
@@ -1720,8 +1508,9 @@ class BirthdayApp {
           lightbox.classList.add('hidden');
           return;
         }
-        if (this.currentActivePanel) {
-          this.closePanel();
+        const letterModal = document.getElementById('letter-modal');
+        if (letterModal && !letterModal.classList.contains('hidden')) {
+          letterModal.classList.add('hidden');
         }
       }
     });
